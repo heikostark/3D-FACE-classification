@@ -1,0 +1,141 @@
+//!./imagexd
+ 
+var m0 m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11 m12 m13 m14 m15 m16
+var input input_dir
+ 
+procedure doit
+	include "mrt_orientation.inc" // input_dir ->
+ 
+	include "mrt_orientation_checkup.inc"
+ 
+	scalar.use old_mask // old mask
+	scalar.sethigher 1 1
+	s := scalar.size
+ 
+	scalar.use mask // new mask
+	scalar.new s
+	file := input ".nii.gz"
+	scalar.load.properties file
+ 
+	scalar.fill.aboveplane F_10 mediolateral 1
+	scalar.fill.belowplane F_10 mediolateral 2
+ 
+	scalar.add.aboveplane F_7 mediolateral 2
+	scalar.add.belowplane F_2 mediolateral 2
+ 
+	scalar.add.aboveplane eye_down craniocaudal 4
+ 
+	scalar.add.aboveplane eye_up craniocaudal 4
+	scalar.add.belowplane F_10 craniocaudal 12
+ 
+	cent_up += cent craniocaudal
+ 
+	scalar.use old_mask
+	scalar.fill.sphere_sweep cent cent_up dist 0
+ 
+	dorsoventral x= craniocaudal mediolateral
+	scalar.fill.belowplane cent dorsoventral 0
+ 
+	m0 := scalar.count 1
+ 
+	new := scalar.mul old_mask mask
+	scalar.use new
+	file := input "_out_split.nii.gz"
+	scalar.save file
+ 
+	m1 := scalar.count 1
+	m2 := scalar.count 2
+	m3 := scalar.count 3
+	m4 := scalar.count 4
+	m5 := scalar.count 5
+	m6 := scalar.count 6
+	m7 := scalar.count 7
+	m8 := scalar.count 8
+	m9 := scalar.count 9
+	m10 := scalar.count 10
+	m11 := scalar.count 11
+	m12 := scalar.count 12
+	m13 := scalar.count 13
+	m14 := scalar.count 14
+	m15 := scalar.count 15
+	m16 := scalar.count 16
+ 
+	scalar.new
+end
+ 
+full := true
+ 
+if full
+then
+	io.dirs.complete * // load all sub dirs into a dir list
+end
+else
+	io.dirs.add "05-(20_23)"
+	io.dirs.add "10-(30_23)"
+	io.dirs.add "11-(18_24)"
+	io.dirs.add "12-(31_24)"
+end
+io.files "mask_XX.nii.gz" // load all files from sub dirs into a file list
+io.files.sort
+ 
+output.store "stat_fat_out_sub.csv"
+ 
+print "ID" #9 "Centroid" #9 "Distance" #9 "Total" #9 "Part_1" #9 "Part_2" #9 "Part_3" #9 "Part_4" #9 "Part_5" #9 "Part_6" #9 "Part_7" #9 "Part_8" #9 "Part_9" #9 "Part_10" #9 "Part_11" #9 "Part_12" #9 "Part_13" #9 "Part_14" #9 "Part_15" #9 "Part_16"
+ 
+for io.files.length // for all files
+	scalar.use fat
+	scalar.new
+	input_dir := io.files.getdir
+	b $= 2 input_dir
+	a $= -7 input_dir	
+	input := "Fat/" b " " a " Fat"
+ 
+	file := input ".nii.gz"
+	scalar.load file
+	old_mask := scalar.copy 2
+	scalar.use old_mask
+	scalar.setlower 64 0 // falls Grauwerte
+	scalar.sethigher 64 1 // falls Grauwerte
+	cent := scalar.centroid 1
+ 
+	scalar.use mask_rater
+	scalar.new
+ 
+	file := io.workdir / io.files.getdir / io.files.getname ".nii.gz"
+	scalar.load file
+	scalar.sethigher 1 1 // falls Grauwerte
+	dist := scalar.distance cent 1
+ 
+	id := io.files.getdir
+ 
+	doit // it used scalar bones	
+ 
+	print id #9 cent #9 dist #9 m0 #9 m1 #9 m2 #9 m3 #9 m4 #9 m5 #9 m6 #9 m7 #9 m8 #9 m9 #9 m10 #9 m11 #9 m12 #9 m13 #9 m14 #9 m15 #9 m16 
+ 
+	io.files.next
+end
+ 
+end
+ 
+execute Rscript run.r
+ 
+// saved on date 2.5.2025 | time 11:38:42:473 h
+// saved on date 5.5.2025 | time 9:27:50:517 h
+// saved on date 20.6.2025 | time 14:53:13:872 h
+// saved on date 1.7.2025 | time 10:58:52:129 h
+// saved on date 1.7.2025 | time 15:56:50:825 h
+// saved on date 2.7.2025 | time 16:26:0:512 h
+// saved on date 11.7.2025 | time 15:2:0:590 h
+// saved on date 11.7.2025 | time 16:10:20:722 h
+// saved on date 3.9.2025 | time 16:10:24:449 h
+// saved on date 9.10.2025 | time 8:30:5:476 h
+// saved on date 20.11.2025 | time 15:59:20:268 h
+// saved on date 29.12.2025 | time 22:51:33:128 h
+// saved on date 29.12.2025 | time 22:55:4:660 h
+// saved on date 30.12.2025 | time 23:14:21:87 h
+// saved on date 1.1.2026 | time 22:57:49:214 h
+// saved on date 5.1.2026 | time 17:5:20:224 h
+// saved on date 7.1.2026 | time 16:15:23:307 h
+// saved on date 9.1.2026 | time 17:1:26:226 h
+// saved on date 28.1.2026 | time 9:34:45:923 h
+// saved on date 26.3.2026 | time 15:48:3:162 h

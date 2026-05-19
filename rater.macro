@@ -1,0 +1,58 @@
+//!./imagexd
+ 
+io.dirs.complete * // load all sub dirs into a dir list
+io.dirs.sort
+ 
+output.store "stat_rater.csv"
+
+for io.dirs.length // for all files
+	io.files "mask*.nii.gz" // load all files from sub dirs into a file list
+	io.files.sub "mask_sub.nii.gz"
+	io.files.sub "mask_XX.nii.gz"
+	io.files.sub "mask_X3.nii.gz"
+	io.files.sub "mask_*split.nii.gz"
+ 
+	scalar.use mask
+	scalar.new
+
+	a := io.workdir / io.dirs.get / "mask_XX.nii.gz"
+	scalar.load a
+	scalar.sethigher 1 1
+
+	count := 0
+	for io.files.length
+		ifsame io.dirs.get io.files.getdir
+		then
+
+			rater $= -9 io.files.getfile
+			rater $= 2 rater
+			id := io.files.getdir "_" rater
+ 
+			scalar.use dummy
+			scalar.new
+			a := io.workdir / io.dirs.get / io.files.getfile
+			scalar.load a
+			scalar.sethigher 1 2 // falls Grauwerte
+ 
+			add := scalar.add mask dummy
+			scalar.use add
+
+			a := scalar.count 1
+			b := scalar.count 2
+			c := scalar.count 3
+			scalar.new
+			writeln id #9 a #9 b #9 c #9
+		end
+		io.files.next
+	end
+
+	io.dirs.next
+end
+
+end
+// saved on date 2.5.2025 | time 11:38:42:473 h
+// saved on date 5.5.2025 | time 9:27:50:517 h
+// saved on date 8.5.2025 | time 17:5:9:658 h
+// saved on date 21.11.2025 | time 14:44:33:859 h
+// saved on date 26.11.2025 | time 12:22:29:231 h
+// saved on date 27.12.2025 | time 22:44:17:717 h

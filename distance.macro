@@ -1,0 +1,54 @@
+//!./imagexd
+ 
+thread.max := 40
+ 
+io.dirs.complete * // load all sub dirs into a dir list
+io.files "*AX3D.nii.gz" // load all files from sub dirs into a file list
+io.files.sort
+ 
+for io.files.length // for all files
+	id := io.files.getdir
+	x $= 2 id
+	y $= -7 id	
+ 
+	ifone @x=13 @x=14
+	then
+	scalar.use bone_new
+	scalar.new
+	scalar.use bone
+	scalar.new
+	a := "Bones" / x "-" y " Segmentation-Bones.nii.gz"
+	scalar.load a
+	scalar.setvalue 32768 0
+	scalar.sethigher 1 1
+	bone_new := scalar.copy.label 2
+	scalar.use bone_new
+	scalar.sethigher 1 1
+ 
+	scalar.use muscle
+	scalar.new
+	a := x "-" y / "mask_XX.nii.gz"
+	scalar.load a
+	scalar.sethigher 1 2
+ 
+	compare := scalar.add bone_new muscle
+	scalar.use compare
+	a := "Distance" / x "-" y " compare.nii.gz"
+	scalar.save a
+ 
+	scalar.fullscan false
+	new := scalar.measure.distance 60 <2,3> <1,1>
+	scalar.new
+	
+	scalar.use new
+	a := "Distance" / x "-" y " distance.nii.gz"
+	scalar.save a
+	scalar.new
+	end
+	
+	io.files.next
+end
+ 
+// saved on date 20.1.2026 | time 17:20:26:255 h
+// saved on date 23.1.2026 | time 12:26:33:504 h
+// saved on date 28.1.2026 | time 11:3:29:810 h

@@ -1,0 +1,177 @@
+//!./imagexd
+ 
+var m0 m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11 m12 m13 m14 m15 m16
+var input input_dir
+ 
+procedure doit
+ 
+	include "mrt_orientation.inc" // input_dir ->
+ 
+	include "mrt_orientation_checkup.inc"
+ 
+	scalar.use old_mask // old mask
+	//scalar.sethigher 1 1
+	s := scalar.size
+ 
+	scalar.use mask // new mask
+	scalar.new s
+	file := input ".nii.gz"
+	scalar.load.properties file
+ 
+	scalar.fill.aboveplane F_10 mediolateral 1000
+	scalar.fill.belowplane F_10 mediolateral 2000
+ 
+	scalar.add.aboveplane F_7 mediolateral 2000
+	scalar.add.belowplane F_2 mediolateral 2000
+ 
+	scalar.add.aboveplane eye_down craniocaudal 4000
+ 
+	scalar.add.aboveplane eye_up craniocaudal 4000
+	scalar.add.belowplane F_10 craniocaudal 12000
+ 
+	new := scalar.add old_mask mask
+	scalar.use new
+	file := input "_intensity_split.nii.gz"
+	scalar.save file
+ 
+	m1 := scalar.statistic 1001 1999
+	m2 := scalar.statistic 2001 2999
+	m3 := scalar.statistic 3001 3999
+	m4 := scalar.statistic 4001 4999
+	m5 := scalar.statistic 5001 5999
+	m6 := scalar.statistic 6001 6999
+	m7 := scalar.statistic 7001 7999
+	m8 := scalar.statistic 8001 8999
+	m9 := scalar.statistic 9001 9999
+	m10 := scalar.statistic 10001 10999
+	m11 := scalar.statistic 11001 11999
+	m12 := scalar.statistic 12001 12999
+	m13 := scalar.statistic 13001 13999
+	m14 := scalar.statistic 14001 14999
+	m15 := scalar.statistic 15001 15999
+	m16 := scalar.statistic 16001 16999
+ 
+	scalar.new
+	
+	scalar.use old_mask
+	scalar.new
+end
+ 
+procedure doit_fast 
+	scalar.use new
+	file := input "_intensity _split.nii.gz"
+	scalar.load file
+ 
+	m1 := scalar.statistic 1001 1999
+	m2 := scalar.statistic 2001 2999
+	m3 := scalar.statistic 3001 3999
+	m4 := scalar.statistic 4001 4999
+	m5 := scalar.statistic 5001 5999
+	m6 := scalar.statistic 6001 6999
+	m7 := scalar.statistic 7001 7999
+	m8 := scalar.statistic 8001 8999
+	m9 := scalar.statistic 9001 9999
+	m10 := scalar.statistic 10001 10999
+	m11 := scalar.statistic 11001 11999
+	m12 := scalar.statistic 12001 12999
+	m13 := scalar.statistic 13001 13999
+	m14 := scalar.statistic 14001 14999
+	m15 := scalar.statistic 15001 15999
+	m16 := scalar.statistic 16001 16999
+ 
+	scalar.new
+	
+	scalar.use old_mask
+	scalar.new
+end 
+ 
+full := true
+ 
+if full
+then
+	io.dirs.complete * // load all sub dirs into a dir list
+end
+else
+	io.dirs.add "05-(20_23)"
+	io.dirs.add "10-(30_23)"
+	io.dirs.add "11-(18_24)"
+	io.dirs.add "12-(31_24)"
+end
+io.files "*iso_0k64.nii.gz" // load all files from sub dirs into a file list
+io.files.sort
+ 
+output.store "stat_intensities_sub.csv"
+ 
+print "ID" #9 "Mean_Total" #9 "SD_Total" #9 "Mean_01" #9 "SD_01" #9 "Mean_02" #9 "SD_02" #9 "Mean_03" #9 "SD_03" #9 "Mean_04" #9 "SD_04" #9 "Mean_05" #9 "SD_05" #9 "Mean_06" #9 "SD_06" #9 "Mean_07" #9 "SD_07" #9 "Mean_08" #9 "SD_08" #9 "Mean_09" #9 "SD_09" #9 "Mean_10" #9 "SD_10" #9 "Mean_11" #9 "SD_11" #9 "Mean_12" #9 "SD_12" #9 "Mean_13" #9 "SD_13" #9 "Mean_14" #9 "SD_14" #9 "Mean_15" #9 "SD_15" #9 "Mean_16" #9 "SD_16"
+ 
+for io.files.length // for all files
+	scalar.use mask_data
+	scalar.new
+	input_dir := io.files.getdir
+	b $= 2 input_dir
+	a $= -7 input_dir	
+	input := "mask_XX"
+	file := io.workdir / io.files.getdir / input ".nii.gz"
+	scalar.load file
+	scalar.sethigher 1 1
+ 
+	scalar.use mask_sub
+	scalar.new 
+	file := io.workdir / io.files.getdir / "mask_sub.nii.gz"
+	scalar.load file
+ 
+//	unknown := scalar.mask mask_rater mask_sub 0
+	mimik_mask := scalar.mask mask_data mask_sub 1 2
+//	platysma := scalar.mask mask_rater mask_sub 2
+//	kill_mask := scalar.mask mask_rater mask_sub 3 4 5
+//	kaumuskulatur := scalar.mask mask_rater mask_sub 3
+//	augenmuskulatur := scalar.mask mask_rater mask_sub 4
+//	zungenmuskulatur := scalar.mask mask_rater mask_sub 5 
+ 
+	scalar.use old_intensity_mask
+	scalar.new 
+	file := io.workdir / io.files.getdir / io.files.getfile
+	scalar.load file
+	intensity_mask := scalar.copy 2
+ 
+	old_mask := scalar.mask intensity_mask mimik_mask 1
+ 
+	scalar.use old_mask
+	m0 := scalar.statistic 1 65535
+ 
+	id := io.files.getdir
+ 
+	doit // it used scalar bones	
+	//doit_fast // use precalculated values
+ 
+	print id #9 m0[1] #9 m0[2] #9 m1 #9 m2 #9 m3 #9 m4 #9 m5 #9 m6 #9 m7 #9 m8 #9 m9 #9 m10 #9 m11 #9 m12 #9 m13 #9 m14 #9 m15 #9 m16 
+ 
+	io.files.next
+end
+ 
+end
+ 
+execute Rscript run.r
+ 
+// saved on date 2.5.2025 | time 11:38:42:473 h
+// saved on date 5.5.2025 | time 9:27:50:517 h
+// saved on date 20.6.2025 | time 14:53:13:872 h
+// saved on date 1.7.2025 | time 10:58:52:129 h
+// saved on date 1.7.2025 | time 15:56:50:825 h
+// saved on date 2.7.2025 | time 16:26:0:512 h
+// saved on date 11.7.2025 | time 15:2:0:590 h
+// saved on date 11.7.2025 | time 16:10:20:722 h
+// saved on date 3.9.2025 | time 16:10:24:449 h
+// saved on date 9.10.2025 | time 8:30:5:476 h
+// saved on date 20.11.2025 | time 15:59:20:268 h
+// saved on date 29.12.2025 | time 22:51:33:128 h
+// saved on date 29.12.2025 | time 22:55:4:660 h
+// saved on date 30.12.2025 | time 23:14:21:87 h
+// saved on date 1.1.2026 | time 22:57:49:214 h
+// saved on date 5.1.2026 | time 17:5:20:224 h
+// saved on date 7.1.2026 | time 16:15:21:578 h
+// saved on date 9.1.2026 | time 17:1:33:803 h
+// saved on date 23.1.2026 | time 17:31:44:456 h
+// saved on date 30.1.2026 | time 17:58:48:910 h
+// saved on date 2.2.2026 | time 15:33:18:69 h
+// saved on date 26.3.2026 | time 15:48:7:291 h

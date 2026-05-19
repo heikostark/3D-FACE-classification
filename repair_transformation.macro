@@ -1,0 +1,42 @@
+//!./imagexd
+ 
+io.dirs.complete * // load all sub dirs into a dir list
+//io.files "mask_sub.nii.gz"
+io.files "mask_XX.nii.gz"
+ 
+for io.files.length // for all files
+	scalar.use original
+	scalar.new
+	a := io.workdir / io.files.getdir / "mask_HS.nii.gz"
+	scalar.load a
+	m := scalar.matrix
+	o := scalar.origin  
+ 
+	scalar.use kopie
+	scalar.new
+	a := io.workdir / io.files.getdir / "mask_sub.nii.gz"
+	scalar.load a
+	scalar.matrix m
+	scalar.origin o
+	scalar.save a
+ 
+	scalar.use kopie
+	scalar.new
+	a := io.workdir / io.files.getdir / "mask_XX.nii.gz"
+	scalar.load a
+	scalar.matrix m
+	scalar.origin o
+	scalar.save a
+	
+	scalar.use kopie
+	scalar.new
+	a := io.workdir / io.files.getdir / "mask_X3.nii.gz"
+	scalar.load a
+	scalar.matrix m
+	scalar.origin o
+	scalar.save a
+ 
+	io.files.next
+end
+// saved on date 6.5.2025 | time 13:6:31:440 h
+// saved on date 20.5.2025 | time 10:32:52:623 h

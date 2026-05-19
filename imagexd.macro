@@ -1,0 +1,1109 @@
+//!./imagexd // Version: 8.12.26
+// This is a list of imagexd commands - you can use this macro like a programing language
+// For more infos, please see https://stark-jena.de | imagexd
+// Copyright (c) 2017-2026 by Heiko Stark
+
+io.file.remove "imagexd.macro" // remove old command list
+execute ./imagexd // make new command list
+halt // Do not interpret the rest
+// *************************************************
+
+// @variable denotes builtin variables.
+// Assignment := are only used if the stack type is the same (image := image.func) or a result (10 := image.func).
+
+// *************************************************
+
+clean // same as new
+new // clean memory - all scalar, vector, tensor, mesh and line
+dump // dump // dump all scalar, vector, tensor, mesh and line workspace lists
+
+// Absolute values are recommended. However, some commands also allow relative values (marked as %)!
+// absolute: -max..-1:inverse 0:center 1..max:normal
+// relative: -0.99999..-0.00001:inverse 0:center 0.00001..0.99999:normal
+
+// *************************************************
+
+imagemagick.enable // imagemagick.disable
+freeimage.enable // freeimage.disable
+
+a := image.ifimage // true, if the image has a size bigger than 0x0
+a := image.ifplain // true, if the image has only one value for all
+
+a := image.size // image size <x,y>
+a := image.center // image center <x,y>
+a := image.origin // image center <x,y>
+a := image.matrix // image center <x,y>
+a := image.matrix.v1 // image center <x,y>
+a := image.matrix.v2 // image center <x,y>
+a := image.matrix.v3 // image center <x,y>
+
+// Note: The bit level is relevant, if a new image is created (i.e. image.load or first time image.use)!
+image.8bit // set image workspace to 8bit
+image.16bit // set image workspace to 16bit (Default)
+image.24bit // set image workspace to 3*8bit rgb
+image.32bit // set image workspace to 4*8bit rgba
+image.40bit // set image workspace to 16bit+3*8bit zrgb
+
+image.value 12 // set image value // 0..255; 0..65535; <0..255, 0..255, 0..255> or <0..255, 0..255, 0..255> 255
+image.background 0 // set image background // 0..255; 0..65535; <0..255, 0..255, 0..255> or <0..255, 0..255, 0..255> 255
+
+image.use new1 // create new image workspace
+image.swap new1 new2 // swap images
+image.name old1 // rename
+image.dump // dump image workspace list
+
+image.clean // clean image - same as image.new <0, 0>
+image.new x y // or <x, y> or empty - clear field (1..x 1..y)
+image.offset // set offset to zero
+image.offset.center // set offset to the image center
+image.offset <x, y, z> image.offset // set offset to zero
+image.scale <x, y, z> // fill matrix with positive scaling
+image.matrix <x1, y1, z1> <x2, y2, z2> <x3, y3, z3> // scale and rotation matrix
+image.unflip // set matrix to positive values
+image.unrotate // set matrix to diagonal matrix
+a := image.l2g <x, y, z> // local to global coordinates
+a := image.g2l <x, y, z> // global to local coordinates
+
+image.load image.input // load a file
+//      8bit+16bit (pnm, pbm, pgm, ppm, bmp, dib, imgf)
+//      24bit+32bit (pnm, pbm, pgm, ppm, bmp, dib, rgb)
+//      with Imagemagick (over 200 data formats, including PNG, JPEG, JPEG-2000, GIF, TIFF, DPX, EXR, WebP, Postscript, PDF, and SVG)
+image.loadpnm image.input // load a pnm(pbm, pgm, ppm)-file
+image.loadbmp image.input // load a bmp(dib)-file
+image.loadimgf image.input // load a imgf-file (only 8bit+16bit)
+image.loadrgb image.input // load a rgb-file (only 24bit+32bit)
+image.loadraw image.input 0 100 100 // load a headerless (0) 100x100 rgb-file (only 16bit, 24bit or 32bit auto-detection)
+image.save newfile // save a file
+//      8bit+16bit (pgm, tif, png)
+//      24bit+32bit (pbm, pgm, ppm, pam, bmp, dib, tga, tif, png, rgb)
+//      with Imagemagick (over 200 data formats, including PNG, JPEG, JPEG-2000, GIF, TIFF, DPX, EXR, WebP, Postscript, PDF, and SVG)
+
+image.crop 10 // crop an image to a new subimage with values below 10
+new := image.copy // copy an image to new
+image.copy.method 1 // 0=sum 1=mean(default) 2=sd 3=min 4=Q.25 5=median 6=Q.75 7=max // binning only for image.copyscale
+new := image.copy // copy image field to new
+new := image.copy 0.5 // isometric copy and scale image field to new
+new := image.copy <0.5, 1> // anisometric copy and scale image field to new
+new := image.resize <100, 100> // anisometric copy and resize the image field to new
+new := image.copy.label 0.5 // copy and scale image field to new, without label averaging (max. value count)
+new := image.subimage <10, 10> <20, 20> // %(abs & rel) copy part of the image to new
+new := image.subimage.rel <10, 10> <10, 10> // %(abs & rel) same as above (pos size), copy part of the image to new
+
+image.split.rgb // split rgb image into (name.red, name.green, name.blue) gray images
+image.split.rgba // split rgba image into (name.red, name.green, name.blue, name.alpha) gray images
+image.split.rainbow // split rgb image into (name.red, name.green, name.blue, name.yellow, name.cyan, name.purple, name.gray) gray images
+image.split.rainbow.shift 2 // split (rgb8 -> rgb6) image into (see above) gray images (not shifted)
+image.split.color <0, 0, 0> <255, 255, 255> ... // split image into several images with points nearest to color (name.1, name.2, ...)
+image.split.colorpoint <10, 10> <100, 100> ... // %(abs & rel) split image into several images with points nearest to color at point (name.1, name.2, ...)
+// Note: Fullgray images are divided by 256 (shr 8) and rgb converted to gray to fit in 8bit!
+new := image.combine name.red name.green name.blue // combine gray images (only two, three or four) into rb, rgb (24bit) or rgba (32bit) image
+
+new := image.select old1 6 // new := if old1 into value or range then set new to old1
+new := image.select old1 6 1 // new := if old1 into value or range then set new to 1
+new := image.select old1 <128, 255> // new := if old1 into value or range then set new to old1
+new := image.select old1 <128, 255> 1 // new := if old1 into value or range then set new to 1
+new := image.group old1 <128, 255> // new := if old1 into value or range then assign to group
+new := image.group.add old1 <128, 255> // new := if old1 into value or range then assign to group
+new := image.group.min old1 <128, 255> 99 // new := if old1 into value or range then assign to group (if group > 100 pixel)
+new := image.group.minmax old1 <128, 255> <100, 200> // new := if old1 into value or range then assign to group (if group into 100..200 pixel)
+// Can only be used with a previous grouping!
+image.group.unsort // random sorting
+image.group.sort.inverse false // default false
+image.group.sort.count // max groups based on counts (borders, fractions)
+image.group.sort.count 10 // 10 groups based on counts
+image.group.sort.border 10 // 10 groups based on borders
+image.group.sort.fraction 10 // 10 groups based on borders/volumes
+image.group.sort.fraction.log 20 10 // 20 groups with log10
+image.group.stat out.txt // write groupid border count border/count
+
+// Note!: Only properties of "old" are copied if "new" has the size <0,0,0> (from image.new)
+new := image.stacking old1 old2 ... // new := best parts of (old1 old2 ...)
+new := image.over old1 old2 ... // new := old1 over old2 over ... // alpha blending
+new := image.sub old1 old2 // new := old1 - old2
+new := image.sub.abs old1 old2 // new := abs (old1 - old2)
+new := image.sub.range old1 old2 // new := rangecenter + (old1 - old2)
+new := image.between old1 between old2 // new := (between - old1) + (between - old2)
+new := image.add old1 old2 // new := old1 + old2 // up to 99 images
+new := image.add.min old1 old2 // new := min(old1,old2) // up to 99 images
+new := image.add.max old1 old2 // new := max(old1,old2) // up to 99 images
+new := image.mul old1 old2 // new := (old1 * old2) / (255 or 65535) // also new := (old1 * old2 * old3) / (255*255 or 65535*65535)
+new := image.div old1 old2 // new := ((256 or 65536)*old1) / (old2+1)
+new := image.mean old1 old2 // new := (old1 + old2)/2 // also new := (old1 + old2 + old3)/3
+new := image.median old1 old2 old3 // new := old2 if old1 < old2 < old3
+new := image.intensity old1 old2 1/2 1 // new := (old1/1/2 + old2/1)/2 * (1/2+1)/2 // intensity mapping for 1/2 s and 1 s
+
+// Note!: Only properties of "old" are copied if "new" has the size <0,0,0> (from image.new)
+new := image.mask old1 mask 0 <1, 10> ... // new := if mask = (0 or 1..10 or ...) use old1
+new := image.mask.same old1 mask same 0.1 // new := if mask = same+/-10% use old1
+new := image.mask.different old1 mask same 0.1 // new := if mask <> same+/-10% use old1
+new := image.extract.color old1 <0, 0, 0> <255, 255, 255> ... // new := if (old1 = color) use old1
+new := image.extract.colorpoint old1 <10, 10> <100, 100> ... // %(abs & rel) new := if (old1 = (color at point)) use old1
+
+image.setsign // for wrapped values 32768..65535..0..32767 (signed values) -> 0..65535
+image.setrange // put first value to zero (if wrapped values, it does setsign)
+image.setcrop // for single spots (begin and end)
+image.setlower 7 0 // set ...7 to 0
+image.setvalue <7, 247> 247 // set for 8bit and 16bit -> 7..247 to 247
+image.setvalue <128, 0, 0> <128, 0, 255> // set for 24bit and 32bit -> <128, 0, 0> to <128, 0, 255>
+image.sethigher 247 247 // set 247... to 247
+image.setadjust // adjust the gray or rgb level - e.g. 10..200 -> 0..255 or 0..65535
+image.setadjust <10, 200> // adjust the gray or rgb level - eg. 10..200 -> 0..255 or 0..65535
+image.setadjust <10, 200> <5, 250> // adjust the gray or rgb level - eg. 10..200 -> 5..250
+image.setadjust.one // adjust the gray or rgb level - eg. (1%)±10..200±(1%) -> 0..255 or 0..65535
+image.setadjust.percentage 0.05 // adjust the gray or rgb level - eg. (5%)±10..200±(5%) -> 0..255 or 0..65535
+image.setadjust.percentage 0.05 0.01 // adjust the gray or rgb level - eg. (5%)±10..200±(1%) -> 0..255 or 0..65535
+image.setadjust.percentage.weak 0.05 0.01 // adjust the gray or rgb level - eg. (5%)±10..200±(5%) -> 0..255 or 0..65535
+image.setadjust.percentage.weak 0.05 0.01 0.03 0.01 // adjust the gray or rgb level - eg. (5%)±10..200±(3%) -> (1%)±0..255±(1%) or (1%)±0..65535±(1%)
+image.setadjust.outliers // adjust the gray or rgb level - eg. (1/4(q2-q1))±10..200±(1/4(q3-q2)) -> 0..255 or 0..65535
+image.setequal // adjust the gray or rgb level to an equal distribution
+
+image.setpeaklower // eg. 100..peak..200 -> -50..0..50
+image.setpeakmiddle // eg. 100..peak..200 -> 78..128..178 or 32718..32768..32818
+image.setpeakhigher // eg. 100..peak..200 -> 205..255..305 or 65485..65535..65585
+
+image.setpeak.local 128 <64, 192> // for a peak into 64..192 - eg. 100..peak..200 -> 78..128..178
+image.setpeak.localred 128 <64, 192> // for a peak into red 64..192 - eg. all rgb 100..peak..200 -> 78..128..178
+image.setpeak.localgreen 128 <64, 192> // for a peak into green 64..192 - eg. all rgb 100..peak..200 -> 78..128..178
+image.setpeak.localblue 128 <64, 192> // for a peak into blue 64..192 - eg. all rgb 100..peak..200 -> 78..128..178
+
+image.setbalance <-100, -100, -100> <-100, 0, 100> <100, 100, 100> // set for 24bit and 32bit -> color balance for shadows, midtones and highlights (with preserving luminosity)
+image.setbalance.shadows <-100, -100, -100> // set for 24bit and 32bit -> color balance for shadows (with preserving luminosity)
+image.setbalance.midtones <-100, 0, 100> // set for 24bit and 32bit -> color balance for midtones (with preserving luminosity)
+image.setbalance.highlights <100, 100, 100> // set for 24bit and 32bit -> color balance for highlights (with preserving luminosity)
+
+image.setmin.red <0, 0, 0> // set for 24bit and 32bit -> (<0, 255, 255>; <0,255,10>; <0,128,1>; ...) to <0, 0, 0>
+image.setmin.green .blue, .yellow, .cyan, .purple - see above
+image.setmax.red <0, 0, 0> // set for 24bit and 32bit -> (<255, 0, 0>; <255,250,10>; <255,128,254>; ...) to <0, 0, 0>
+image.setmax.green .blue, .yellow, .cyan, .purple - see above
+
+// color.map.volume1 5 100 // please define a colormap (100 means interpolation steps)
+image.colorize // gray: 0..255, fullgray: 0..65535, rgb: rgba: 0..255+255+255
+
+image.setmono 128 // binary value with threshold
+image.setgray // only rgb and rgba
+image.sethdrgray // only rgb and rgba
+
+image.softsmooth 1 // default image.softsmooth
+image.smooth 4 // 4 times smooth
+image.hardsmooth 1
+image.unsharpmasking 1
+image.cleanup image.setadjust + image.smooth + 2*image.unsharpmasking
+
+image.filter 0 1 0 1 0 1 0 1 0  4 // matrix [1..9] div [10]
+
+image.fill // fill image with image.value
+image.fill.random // fill image with random values
+image.fill.cube <1, 1> <0,0> // fill subimage (1,1 .. x/2,y/2) with image.value
+image.fill.hole <5, 15> // fill holes with image.value from structures 5..15
+image.fill.zero // fill zeros with interpolated image values
+image.fill.gap // fill zero holes with interpolated image values
+image.fill.gap <10,10> <100,100> // fill zero holes inside area with interpolated image values
+image.invert // invert image
+image.invert 765 // invert image inside range 0..765 - only for 16bit
+
+// Note: image.shrink = image.erode, image.fullshrink = image.fullerode, image.grow = image.dilate, image.fullgrow = image.fulldilate
+image.shrink <128, 255> 4 // remove single spots, if 4 neighbors (max 8) outside value or range
+image.shrink <128, 255> 4 1 // replace single spots with 1, if 4 neighbors (max 8) outside value or range
+image.fullshrink (see above) // loop image.shrink until be found no more shrinking points or iteration steps > 9999
+image.grow <128, 255> 4 // fill single hole, if 4 neighbors (max 8) inside value or range
+image.grow <128, 255> 4 1 // replace single hole with 1, if 4 neighbors (max 8) inside value or range
+image.fullgrow (see above) // loop image.grow until be found no more growing points or iteration steps > 9999
+image.open (see above) // shrink + grow
+image.close (see above) // grow + shrink
+image.close <128, 255> 4 4 1 1 // grow <128, 255> 4 1 + shrink <128, 255> 4 1
+
+image.remove.outliers 2 // if value outside of median+/-(factor * abs(q.25-q.75))
+
+image.histogram // write histogram to stdout
+image.histogram.image histogram.pgm // save histogram image
+image.histogram.raw histogram.txt // save histogram values
+image.analysis // write analysis to stdout
+image.analysis.image analysis.pgm // save histogram + analysis image
+image.analysis.raw analysis.txt // save histogram + analysis values
+
+image.window.sin // Sine window function 
+image.window.cos // Cosine window function
+
+image.radial <0,0> // paint the angle values around center point
+image.radial.half
+image.radial.quater
+image.distance <10,3> <100,23> .. // calculates the distance of each pixel to this points
+
+image.flip.x
+image.flip.y
+image.rotate.90 // -270°
+image.rotate.180 // -180°, (flip.x + flip.y)
+image.rotate.270 // -90°
+image.rotate.360 // -360°, 0°
+
+image.getsphere <1,255> 10 // spheres with values <1,255> with max radius 10 stored in line as (x,y,z,r)
+
+a := image.object.center 64 128 // as min q.25 q.50 q.75 max
+a := image.object.center 64 1.5 128 // with 1.5 scaling 
+a := image.object.size 64 128 // as value
+
+a := image.getbackground // most pixel value
+a := image.min // min pixel value
+a := image.max // max pixel value
+a := image.count 0 128 // pixel count with values from 0..128
+a := image.sum 0 128 // pixel sum with values from 0..128
+a := image.statistic 0 128 // pixel mean SD with values from 0..128
+a := image.statistic 0 0.5 128 // pixel mean*0.5 SD*0.5 with values from 0..128
+// mean a[1], sd a[2]
+a := image.quantile 0 128 // pixel min q.25 median q.75 max with values from 0..128
+a := image.quantile 0 0.5 128 // pixel min*0.5 q.25*0.5 median*0.5 q.75*0.5 max*0.5 with values from 0..128
+// min a[1], q.25 a[2], median a[3], q.75 a[4], max a[5]
+a := image.centroid 0 128 // centroid from values 0..128
+a := image.cog 0 128 // cog from values 0..128
+
+// Note: The diffusion method works best with isotropic pixels!
+image.submethod 2 // 0=sum 1=mean 2=sd(default) 3=min 4=Q.25 5=median 6=Q.75 7=max
+image.fullscan false // true = scan only full circles (without zero), false(default) = scan incomplete circles
+image.diffusion.method 5 // 1=stark2013 2=stark2014a 3=stark2014b 4=stark2015a 5=stark2015b(default) 6=stark2019 // algorithm for image.diffusion
+//       stark2013 = only the single best vector – vectorlength = submethod.SD
+//       stark2014a = mean the two best vectors, if distance < r/2 – vectorlength = submethod.SD
+//       stark2014b = mean (same submethod.SD) best vectors – vectorlength = submethod.SD
+//       stark2015a = mean (same submethod.SD) best vectors (around diffusion.angle (rad)), only for diffusion.max (%)
+//       stark2015b = mean the best vectors (around diffusion.angle (rad)), only for diffusion.max (%)
+//       stark2019  = mean the best vectors (around diffusion.angle (rad)), only for diffusion.max (%) – vectorlength = submethod.SD
+image.diffusion.max 0.25 // (%)
+image.diffusion.angle 0.08726 // (rad) - 5*(pi/180) = 5°
+new := image.diffusion 16 // calculate a image (orientation) field from a image with pixel scan length
+
+image.vertical.sum // pixel sum output to stdout
+image.vertical.sum 128 // from column 128 pixel output to stdout
+image.vertical.sum 128 50 // from column 78-128-178 pixel sum output to stdout
+image.vertical.mean (see above) // pixel mean output to stdout
+image.vertical.sd (see above) // pixel SD output to stdout
+
+image.horizontal.sum (see above) // pixel sum output to stdout
+image.horizontal.mean (see above) // pixel mean output to stdout
+image.horizontal.sd (see above) // pixel SD output to stdout
+
+// *************************************************
+
+a := scalar.ifscalar // true, if scalar has a size bigger than 0x0x0
+a := scalar.ifplain // true, if scalar has only one value for all
+
+a := scalar.size // scalar size <x,y,z>
+a := scalar.center // scalar center <x,y,z>
+a := scalar.origin // scalar center <x,y,z>
+a := scalar.matrix // scalar center <x,y,z>
+a := scalar.matrix.v1 // scalar center <x,y,z>
+a := scalar.matrix.v2 // scalar center <x,y,z>
+a := scalar.matrix.v3 // scalar center <x,y,z>
+
+// Note: The bit level is relevant, if a new scalar is created (i.e. scalar.new, scalar.load or first time scalar.use)!
+scalar.1bit // set scalar workspace to 1bit
+scalar.8bit // set scalar workspace to 8bit
+scalar.16bit // set scalar workspace to 16bit (Default)
+
+scalar.value // set scalar value
+scalar.background // set scalar background
+
+// Note: ALL following functions using the scalar field from scalar.use!
+scalar.use new1 // create a new scalar workspace
+scalar.swap new1 new2 // swap scalars
+scalar.name old1 // rename
+scalar.dump // dump scalar workspace list
+
+scalar.clean // clean scalar - same as scalar.new <0, 0, 0>
+scalar.new x y z // or <x, y, z> or empty - new field (1..x 1..y 1..z)
+scalar.offset // set offset to zero
+scalar.offset.center // set offset to the field center
+scalar.offset <x, y, z>
+scalar.scale <x, y, z> // fill matrix with positive scaling
+scalar.matrix <x1, y1, z1> <x2, y2, z2> <x3, y3, z3> // scale and rotation matrix
+scalar.unflip // set matrix to positive values
+scalar.unrotate // set matrix to diagonal matrix
+
+a := scalar.l2g <x, y, z> // local to global coordinates
+a := scalar.g2l <x, y, z> // global to local coordinates
+
+scalar.labels.new // clear all labels
+scalar.labels.clean // clear all labels
+
+scalar.load.labels scalar.txt // load a label file (atlas.xml, tab separated [1#name] or plain [name]) - maximal 0-999 labels
+count := scalar.labels.length // get number of labels
+name := scalar.label 1 // get label name for index 1
+scalar.label 1 "exterior" // set label name "exterior" for index 1
+scalar.labels.dump // dump all labels
+scalar.save.labels scalar.txt // save a label file
+
+scalar.load.filter // reset load filter // see also setendian, setsign, setrange
+scalar.load.filter 12000 // scoped filter (integer) 12000+value (Default 0)
+scalar.load.filter 12000 10 // scoped filter (integer) values (12000+value)*10 (Default 0 1)
+scalar.load.filter 12000 -2 // scoped filter (integer) values (12000+value)/2 (Default 0 1)
+scalar.load scalar.input // load a file or files (nii, nii.gz, (hdr+img), mif, pcr and (pnm or bmp) stacks)
+scalar.load.properties scalar.input // overwrite offset and matrix properties for active scalar field
+scalar.load.hdr scalar.input // load a analyze7.5(hdr,img)-file
+scalar.load.nii scalar.input // load a nifti-file (and .atlas.xml if available)
+scalar.load.nii.gz scalar.input // load a zipped nifti-file
+scalar.load.amira scalar.input // load a amira/avizo-file
+scalar.load.mif scalar.input // load a mif-file
+scalar.load.pcr scalar.input // load a (pcr,vol)-file
+scalar.load.raw scalar.input 452 "byte" <10 , 10, 10> // load a raw-file (header=452 type=byte,word,longword,quadword,single,double,extended,rgb,rgba,wordrgb,wordrgba type=signbyte,...)
+scalar.load.scale scalar.input <x, y, z>// load (pnm or bmp) stacks with specific scale)
+scalar.append scalar.input // load a file or files (nii, nii.gz, (hdr+img), mdf and (pnm or bmp) stacks into a scalar field)
+scalar.appendcenter scalar.input // load a centered file or files (nii, nii.gz, (hdr+img), mdf and (pnm or bmp) stacks into a scalar field)
+scalar.save newfile // save a file (nii, nii.gz, (hdr+img) or (pnm, bmp, tga, tif or png))
+
+scalar.flip.x
+scalar.flip.y
+scalar.flip.z
+
+old := scalar.make.scalar // init scalar field with dimensions from the used scalar field
+scalar.make.vector // init used vector field with dimensions from the used scalar field
+old := scalar.make.vector // init vector field with dimensions from the used scalar field
+scalar.crop <1, 10> // crop scalar field with value or range <1, 10>
+new := scalar.crop <1, 10> // crop scalar field to new substack with value or range <1, 10>
+new := scalar.crop old1 <1, 10> // crop scalar field old1 to new substack with value or range <1, 10>
+new := scalar.crop old1 mask <1, 10> // crop scalar field old1 to new substack with mask value or range <1, 10>
+scalar.move <10, 10, 10> <20, 20, 20> <0, 50, 50> // move block (<10, 10, 10> <20, 20, 20>) with <0, 50, 50> to <10, 60, 60>
+scalar.copy.method 1 // for downscaling 0=sum 1=mean(default) 2=sd 3=min 4=Q.25 5=median 6=Q.75 7=max
+                     // for upscaling 0=block 1=mean(default) 2=sinc
+new := scalar.copy // copy scalar field to new
+new := scalar.copy 0.5 // isometric copy and scale scalar field to new
+new := scalar.copy <0.5, 0.5, 1> // anisometric copy and scale scalar field to new
+new := scalar.resize <100, 100, 100> // anisometric copy and resize scalar field to new
+new := scalar.copy.label 0.5 // copy and scale scalar field to new, without label averaging (max. value count)
+new := scalar.substack <10, 10, 10> <20, 20, 20> // %(abs & rel) copy a part from scalar field to new
+
+new := scalar.select old1 6 // new := if old1 into value or range then set new to old1
+new := scalar.select old1 6 1 // new := if old1 into value or range then set new to 1
+new := scalar.select old1 <128, 255> // new := if old1 into value or range then set new to old1
+new := scalar.select old1 <128, 255> 1 // new := if old1 into value or range then set new to 1
+new := scalar.group old1 <128, 255> // new := if old1 into value or range then assign to group
+new := scalar.group.add old1 <128, 255> // new := if old1 into value or range then assign to group
+new := scalar.group.min old1 <128, 255> 99 // new := if old1 into value or range then assign to group (if group > 99 pixels)
+new := scalar.group.minmax old1 <128, 255> <100, 200> // new := if old1 into value or range then assign to group (if group into 100..200 pixel)
+// Can only be used with a previous grouping!
+scalar.group.unsort // random sorting
+scalar.group.sort.inverse false // default false
+scalar.group.sort.count // max groups based on count (border, fraction)
+scalar.group.sort.count 10 // 10 groups based on count
+scalar.group.sort.border 10 // 10 groups based on border
+scalar.group.sort.fraction 10 // 10 groups based on border/count
+scalar.group.sort.fraction.log 20 10 // 20 groups with log10
+scalar.group.stat out.txt // write groupid border count border/count
+
+// Note!: Only properties of "old" are copied if "new" has the size <0,0,0> (from scalar.new)
+new := scalar.over old1 old2 // if old2 = 0 then new := old1 else new := old2 // up to 99 scalars
+new := scalar.sub old1 old2 // new := old1 - old2
+new := scalar.sub.abs old1 old2 // new := abs (old1 - old2)
+new := scalar.sub.range old1 old2 // new := rangecenter + (old1 - old2)
+new := scalar.between old1 between old2 // new := (between - old1) + (between - old2)
+new := scalar.add old1 old2 // new := old1 + old2 // up to 99 scalars
+new := scalar.add.min old1 old2 // new := min(old1,old2) // up to 99 scalars
+new := scalar.add.max old1 old2 // new := max(old1,old2) // up to 99 scalars
+new := scalar.mean old1 old2 // new := (old1 + old2)/2 // up to 99 scalars
+new := scalar.mean.outliers old1 old2 // new := (old1 + old2)/2 // up to 99 scalars
+new := scalar.median old1 old2 old3 // new := old2 if old1 < old2 < old3 // up to 99 scalars
+new := scalar.median.outliers old1 old2 old3 // new := old2 if old1 < old2 < old3 // up to 99 scalars
+new := scalar.intensity old1 old2 80 120 // new := (old1/80 + old2/120)/2 * (80+120)/2 // intensity mapping for 80 kV and 120 kV
+new := scalar.intensity old1 old2 old3 80 100 120 // new := (old1/80 + old2/100 + old3/120)/3 * (80+100+120)/3 // intensity mapping for 80 kV, 100 kV and 120 kV
+
+scalar.samples <64,128> old // store values from 64..128 into line
+scalar.samples <64,128> old1 old2 // store old1 and old2 values if old1 (64..128) into line
+
+// Note!: Only properties of "old" are copied if "new" has the size <0,0,0> (from scalar.new)
+scalar.milling mask.xy mask.yz mask.xz // combination of scalar.milling...
+new := scalar.milling.xy old1 mask 0 <1,10> ... // new := if mask = (0 or 1..10 or ...) use old1 // mask = image
+new := scalar.milling.xz old1 mask 0 <1,10> ... // new := if mask = (0 or 1..10 or ...) use old1 // mask = image
+new := scalar.milling.yz old1 mask 0 <1,10> ... // new := if mask = (0 or 1..10 or ...) use old1 // mask = image
+new := scalar.mask old1 mask 0 <1, 10> ... // new := if mask = (0 or 1..10 or ...) use old1
+
+scalar.magic mask.xy mask.yz mask.xz
+scalar.magic mask.xy mask2.xy mask.yz mask.xz
+scalar.magic mask.xy mask2.xy mask.yz mask2.yz mask.xz
+scalar.magic mask.xy mask2.xy mask.yz mask2.yz mask.xz mask2.xz
+scalar.magic.color // same as magic but for colors
+
+scalar.setendian // swap endianness $ABCD -> $CDAB
+scalar.setsign // for wrapped values 32768..65535..0..32767 (signed values) -> 0..65535
+scalar.setrange // shift first value to zero
+scalar.setcrop // for single spots (begin and end)
+scalar.setlower 7 0 // set ...7 to 0
+scalar.setvalue <7, 247> 247 // set for 8bit and 16bit -> 7..247 to 247
+scalar.sethigher 247 247 // set 247... to 247
+scalar.setalpha <0, 255> 255 // set alpha 0..255 to 255
+scalar.setadjust // adjust the gray level - eg. 10..200 -> 0..255 or 0..65535
+scalar.setadjust <10, 200> // adjust the gray level - eg. 10..200 -> 0..255 or 0..65535
+scalar.setadjust <10, 200> <5, 250> // adjust the gray level - eg. 10..200 -> 5..250
+scalar.setadjust.one // adjust the gray level - eg. (1%)±10..200±(1%) -> 0..255 or 0..65535
+scalar.setadjust.percentage 0.05 // adjust the gray level - eg. (5%)±10..200±(5%) -> 0..255 or 0..65535
+scalar.setadjust.percentage 0.05 0.01 // adjust the gray level - eg. (5%)±10..200±(1%) -> 0..255 or 0..65535
+scalar.setadjust.percentage.weak 0.05 0.01 // adjust the gray level - eg. (5%)±10..200±(5%) -> 0..255 or 0..65535
+scalar.setadjust.percentage.weak 0.05 0.01 0.03 0.01 // adjust the gray level - eg. (5%)±10..200±(3%) -> (1%)±0..255±(1%) or (1%)±0..65535±(1%)
+scalar.setadjust.outliers // adjust the gray level - eg. (1/4(q2-q1))±10..200±(1/4(q3-q2)) -> 0..255 or 0..65535
+scalar.setequal // adjust the gray level to an equal distribution
+
+scalar.setpeaklower // 100..peak..200 -> -50..0..50
+scalar.setpeakhigher // 100..peak..200 -> 205..255..305 or 65485..65535..65585
+scalar.setpeakmiddle // 100..peak..200 -> 78..128..178 or 32718..32768..32818
+
+scalar.patch.x // patch n slices in x
+scalar.patch.y // patch n slices in y
+scalar.patch.z // patch n slices in z
+
+scalar.fill 10 // fill the field with 10
+scalar.fill.random // fill the field with random values
+scalar.fill.cube <1, 1, 1> <0, 0, 0> 10 // %(abs & rel) fill the subfield (1,1,1 .. x/2,y/2,z/2) with 10
+scalar.fill.sphere <0, 0, 0> 100 10 // %(abs & rel) fill the sphere at (x/2,y/2,z/2) with radius 100 with 10
+scalar.fill.aboveplane <0, 0, 0> <0, 0, 1> 10 // %(abs & rel) fill above plane at (x/2,y/2,z/2) with normal (0,0,1) with 10
+scalar.fill.mirror <0, 0, 0> <0, 0, 1> 10 // %(abs & rel) add in plane at (x/2,y/2,z/2) with normal (0,0,1) with 10
+scalar.fill.belowplane <0, 0, 0> <0, 0, 1> 10 // %(abs & rel) fill below plane at (x/2,y/2,z/2) with normal (0,0,1) with 10
+scalar.fill.holes <5, 15> 10 // fill holes with 10 from structures 5..15
+
+scalar.add.cube <1, 1, 1> <0, 0, 0> 10 // %(abs & rel) add the subfield (1,1,1 .. x/2,y/2,z/2) with 10
+scalar.add.sphere <0, 0, 0> 100 10 // %(abs & rel) add the sphere at (x/2,y/2,z/2) with radius 100 with 10
+scalar.add.aboveplane <0, 0, 0> <0, 0, 1> 10 // %(abs & rel) add above plane at (x/2,y/2,z/2) with normal (0,0,1) with 10
+scalar.add.mirror <0, 0, 0> <0, 0, 1> 10 // %(abs & rel) add in plane at (x/2,y/2,z/2) with normal (0,0,1) with 10
+scalar.add.belowplane <0, 0, 0> <0, 0, 1> 10 // %(abs & rel) add below plane at (x/2,y/2,z/2) with normal (0,0,1) with 10
+
+scalar.invert // invert field
+
+scalar.softsmooth // midpoint is stronger
+scalar.smooth // all the same
+scalar.smooth0 // all the same – do not smooth at zero
+scalar.smooth.label 10 // look for highest amount of value – ignore highest zeros from 27 to 10
+scalar.hardsmooth // midpoint is weaker
+scalar.unsharpmasking // sharp edges
+scalar.cleanup scalar.setadjust + scalar.smooth + 2*scalar.unsharpmasking
+
+scalar.filter 0 0 0 0 1 0 0 0 0  0 1 0 1 0 1 0 1 0  0 0 0 0 1 0 0 0 0  6 // matrix [1..27] div [28]
+scalar.filter.median.add // median from (add along x, y and z)
+scalar.filter.median.mean // median from (mean along x, y and z)
+scalar.filter.median.mul // median from (mul along x, y and z)
+
+// Note: For label fields, please use the next one (.label), otherwise the labels are averaged!
+//       scalar.shrink = scalar.erode, scalar.fullshrink = scalar.fullerode, scalar.grow = scalar.dilate, scalar.fullgrow = scalar.fulldilate
+scalar.shrink <128, 255> 13 // remove single spots, if 13 neighbors (max 26) outside value or range
+scalar.shrink <128, 255> 13 1 // replace single spots with 1, if 13 neighbors (max 26) outside value or range
+scalar.fullshrink (see above) // loop scalar.shrink until be found no more shrinking points or iteration steps > 9999
+scalar.grow <128, 255> 13 // fill single hole, if 13 neighbors (max 26) inside value or range
+scalar.grow <128, 255> 13 1 // replace single hole with 1, if 13 neighbors (max 26) inside value or range
+scalar.fullgrow (see above) // loop scalar.grow until be found no more growing points or iteration steps > 9999
+scalar.open (see above) // shrink + grow
+scalar.close (see above) // grow + shrink
+scalar.close <128, 255> 4 4 1 1 // grow <128, 255> 4 1 + shrink <128, 255> 4 1
+
+scalar.shrink.label <128, 255> 13 // remove single spots, if 13 neighbors (max 26) outside value or range
+scalar.fullshrink.label (see above) // loop scalar.shrink until be found no more shrinking points or iteration steps > 9999
+scalar.grow.label <128, 255> 13 // fill single hole, if 13 neighbors (max 26) inside value or range
+scalar.fullgrow.label (see above) // loop scalar.grow until be found no more growing points or iteration steps > 9999
+scalar.open.label <128, 255> 13 13 // shrink + grow
+scalar.close.label (see above) // grow + shrink
+
+scalar.fill.cave.x <128, 255> // fill from outside along x axis
+scalar.fill.cave.y <128, 255> // fill from outside along y axis
+scalar.fill.cave.z <128, 255> // fill from outside along z axis
+scalar.convex.x <128, 255> // calculate convex hull (yz) and fill along x axis
+scalar.convex.y <128, 255> // calculate convex hull (xz) and fill along y axis
+scalar.convex.z <128, 255> // calculate convex hull (xy) and fill along z axis
+scalar.fill.convex <128, 255> // fill from outside
+
+scalar.remove.outliers 2 // if value outside of median+/-(factor * abs(q.25-q.75))
+
+a := scalar.center // scalar center <x,y,z>
+a := scalar.object.center 0 128 // center ((min+max)/2) from values 0..128
+a := scalar.size // scalar size <x,y,z>
+a := scalar.object.size 0 128 // size (max-min) from values 0..128
+a := scalar.min // min pixel value
+a := scalar.max // max pixel value
+a := scalar.count 0 128 // pixel count with values from 0..128
+a := scalar.sum 0 128 // pixel sum with values from 0..128
+a := scalar.statistic 0 128 // pixel mean SD with values from 0..128
+a := scalar.statistic 0 0.5 128 // pixel mean*0.5 SD*0.5 with values from 0..128
+// mean a[1], sd a[2] 
+a := scalar.quantile 0 128 // pixel min q.25 median q.75 max with values from 0..128
+a := scalar.quantile 0 0.5 128 // pixel min*0.5 q.25*0.5 median*0.5 q.75*0.5 max*0.5 with values from 0..128
+// min a[1], q.25 a[2], median a[3], q.75 a[4], max a[5]
+a := scalar.centroid 0 128 // centroid from values 0..128
+a := scalar.cog 0 128 // cog from values 0..128
+a := scalar.inertia 0 128 // inertia as tensor from values 0..128
+a := scalar.inertia 0 128 0.1 1 // inertia as tensor from values (0..128) *0.1 +1
+a := scalar.boxcounting 0 128 // boxcounting from values 0..128
+a := scalar.boxcounting.local 0 128 100 // boxcounting from values 0..128 for all local boxes with size 100
+
+scalar.info scalar.input out.txt // save header info from nii or .. files.
+scalar.histogram // write histogram to stdout
+scalar.histogram.image histogram.pgm // save histogram image
+scalar.histogram.raw histogram.txt // save histogram values
+scalar.analysis // write analysis to stdout
+scalar.analysis.image analysis.pgm // save histogram + analysis image
+scalar.analysis.raw analysis.txt // save histogram + analysis values
+
+scalar.gradient overview.pgm // overview with decreasing gradient intensities
+scalar.hull overview.pgm // overview from the hull with intensities > 0
+scalar.low overview.pgm // overview with only the lowest intensities
+scalar.high overview.pgm // overview with only the highest intensities
+scalar.xray overview.pgm // overview with the mean intensities
+scalar.color overview.pgm // overview with the mean colorized intensities
+scalar.count overview.pgm // overview with the cumulative intensities
+
+// see image for further properties
+scalar.copy.xy 1 // get xy image from the scalar position %(abs & rel)
+scalar.copy.xz 1 // get xz image from the scalar position %(abs & rel)
+scalar.copy.yz 1 // get yz image from the scalar position %(abs & rel)
+scalar.insert.xy 1 // put xy image to the scalar position %(abs & rel)
+scalar.insert.xz 1 // put xz image to the scalar position %(abs & rel)
+scalar.insert.yz 1 // put yz image to the scalar position %(abs & rel)
+
+// Note: For rgb(a) images the colours from the colour.map (https://stark-jena.de/../../script/colors/) are used!
+// 1=min 2=mean(default) 3=thresholdmean 4=max
+scalar.xy.z 2 // xy projection image from scalar
+scalar.xz.y 2 // xz projection image from scalar
+scalar.yz.x 2 // yz projection image from scalar
+
+scalar.convert.length // store values on vector * length
+scalar.convert.x // store values on vector x-axis
+scalar.convert.y // store values on vector y-axis
+scalar.convert.z // store values on vector z-axis
+
+scalar.fullscan false // true = scan only full spheres (without zero), false(default) = scan incomplete spheres
+new := scalar.measure.mean 10 // measure mean from all inside the block size 2*10 x 2*10 x 2*10
+// You can ensure the correct storage of the floating point value via scalar.scale!
+new := scalar.measure.sd 10 // measure SD from all inside the block size 2*10 x 2*10 x 2*10
+// Note: If no border is found, zero is stored!
+new := scalar.measure.thickness 10 // measure minimal thickness of structures > 0 (with thickness max. 10)
+new := scalar.measure.skeleton 10 // measure minimal thickness of structures > 0 and store only if the measure point is in the center (with thickness max. 10)
+new := scalar.measure.cartoon 40 // measure minimal thickness of structures > 0 only for borders (with thickness max. 40)
+scalar.measure.plane 10 // measure plane direction (based on smallest thickness of structure > 0) and store it in a vector field
+
+scalar.diffusion.map map.pgm 16 // calculate diffusion map from one voxel with scan length at center point
+scalar.diffusion.map map.pgm 16 <0, 0, 0> // calculate diffusion map from one voxel with scan length at center point
+scalar.diffusion.map map.pgm 16 <10, 10, 10> // calculate diffusion map from one voxel with scan length at point <10,10,10>
+scalar.diffusion.map map.pgm 16 <10, 10, 10> <-3, -3, -3> // calculate diffusion map from one voxel with scan length at point <7,7,7>
+scalar.diffusion.map map.pgm 16 <0, 0, 0> <-3, -3, -3> // calculate diffusion map from one voxel with scan length at center point plus <-3,-3,-3>
+scalar.diffusion.colormap map.ppm 16 ... // calculate diffusion map from one voxel with scan length at center point / ... see above
+scalar.diffusion.dump dump.txt 16 ... // dump diffusion from one voxel with scan length at center point / ... see above
+scalar.diffusion.histogram ... // calculate length histogram from one voxel at center point / ... see above
+scalar.diffusion.sd ... // calculate SD's from one voxel at center point / ... see above
+
+// Note: The diffusion method works best with isotropic voxels!
+scalar.submethod 2 // 0=sum 1=mean 2=sd(default) 3=min 4=Q.25 5=median 6=Q.75 7=max
+scalar.fullscan false // true = scan only full spheres (without zero), false(default) = scan incomplete spheres
+scalar.diffusion.method 5 // 1=stark2013 2=stark2014a 3=stark2014b 4=stark2015a 5=stark2015b(default) 6=stark2019 // algorithm for scalar.diffusion
+//       stark2013 = only the single best vector – vectorlength = submethod.SD
+//       stark2014a = mean the two best vectors, if distance < r/2 – vectorlength = submethod.SD
+//       stark2014b = mean (same submethod.SD) best vectors – vectorlength = submethod.SD
+//       stark2015a = mean (same submethod.SD) best vectors (around diffusion.angle (rad)), only for diffusion.max (%)
+//       stark2015b = mean the best vectors (around diffusion.angle (rad)), only for diffusion.max (%)
+//       stark2019  = mean the best vectors (around diffusion.angle (rad)), only for diffusion.max (%) – vectorlength = submethod.SD
+scalar.diffusion.max 0.25 // (%)
+scalar.diffusion.angle 0.08726 // (rad) - 5*(pi/180) = 5°
+scalar.diffusion 16 // calculate a vector field from a scalar with voxel scan length
+scalar.diffusion.x2 8 // calculate a half sized vector field from a scalar with voxel scan length
+scalar.diffusion.x3 5 // calculate a third sized vector field from a scalar with voxel scan length
+scalar.diffusion.x4 4 // calculate a quarter sized vector field from a scalar with voxel scan length
+scalar.diffusion.x5 3 // calculate a fifth sized vector field from a scalar with voxel scan length
+scalar.diffusion.adaptive.x2 8 // calculate a half sized vector field from a scalar with voxel scan length - only for scalar div 2 or if fails for subpixels
+scalar.diffusion.adaptive.x3 5 // calculate a third sized vector field from a scalar with voxel scan length - only for scalar div 3 or if fails for subpixels
+scalar.diffusion.adaptive.x4 4 // calculate a quarter sized vector field from a scalar with voxel scan length - only for scalar div 4 or if fails for subpixels
+scalar.diffusion.adaptive.x5 3 // calculate a fifth sized vector field from a scalar with voxel scan length - only for scalar div 5 or if fails for subpixels
+
+// Note: The connection method works best with isotropic voxels (otherwise, you can test the .aniso methods)!
+scalar.submethod 2 // 0=sum 1=mean 2=sd(default) 3=min 4=Q.25 5=median 6=Q.75 7=max
+scalar.fullscan false // true = scan only full spheres (without zero), false(default) = scan incomplete spheres
+scalar.connection.method 4 // 1=hdti 2=dti 3=ddti 4=hardhardi 5=softhardi(default) 6=hardi // algorithm for scalar.connection
+//       hdti = similar to three direction (x,y,z)/2 diffusion imaging
+//       dti = similar to seven direction (x,y,z + octants)/2 diffusion imaging
+//       ddti = similar to thirteen direction 2*(x,y,z + octants + between x,y,z)/2 diffusion imaging
+//       hardhardi = similar to high angular resolution diffusion imaging with limit of 64 orientation vectors
+//       softhardi = similar to high angular resolution diffusion imaging with limit of 128 orientation vectors
+//       hardi = similar to high angular resolution diffusion imaging
+scalar.connection 16 // calculate a tensor field from a scalar with voxel scan length
+scalar.connection.x2 8 // calculate a half sized tensor field from a scalar with voxel scan length
+scalar.connection.x3 5 // calculate a third sized tensor field from a scalar with voxel scan length
+scalar.connection.x4 4 // calculate a quarter sized tensor field from a scalar with voxel scan length
+scalar.connection.x5 3 // calculate a fifth sized tensor field from a scalar with voxel scan length
+scalar.connection.adaptive_x2 8 // calculate a half sized tensor field from a scalar with voxel scan length - only for scalar div 2 or if fails for subpixels
+scalar.connection.adaptive_x3 5 // calculate a third sized tensor field from a scalar with voxel scan length - only for scalar div 3 or if fails for subpixels
+scalar.connection.adaptive_x4 4 // calculate a quarter sized tensor field from a scalar with voxel scan length - only for scalar div 4 or if fails for subpixels
+scalar.connection.adaptive_x5 3 // calculate a fifth sized tensor field from a scalar with voxel scan length - only for scalar div 5 or if fails for subpixels
+scalar.connection.aniso 16 // calculate a tensor field from a scalar with min (anisotropic) voxel scan length (only for hardi)
+scalar.connection.aniso.x2 8 // calculate a half sized tensor field from a scalar with min (anisotropic) voxel scan length (only for hardi)
+scalar.connection.aniso.x3 5 // calculate a third sized tensor field from a scalar with min (anisotropic) voxel scan length (only for hardi)
+scalar.connection.aniso.x4 4 // calculate a quarter sized tensor field from a scalar with min (anisotropic) voxel scan length (only for hardi)
+scalar.connection.aniso.x5 3 // calculate a fifth sized tensor field from a scalar with min (anisotropic) voxel scan length (only for hardi)
+
+scalar.weaksurface 128 // generate a mesh surface from scalar values (>= 128) - smoothen with scalar values
+scalar.smoothsurface 1 // generate a smooth mesh surface from a scalar value or range - smoothen with local voxel density
+scalar.surface 1 // generate a mesh surface from a scalar value or range
+scalar.cube <1, 5> // generate a hard (cube) mesh surface from a scalar value or range
+scalar.weaksurface.color 128 // generate a mesh surface from scalar values (>= 128) - smoothen with scalar values
+scalar.smoothsurface.color 1 // generate a smooth mesh surface from a scalar value or range - smoothen with local voxel density
+scalar.surface.color 1 // generate a mesh surface from a scalar value or range
+scalar.cube.color <1, 5> // generate a hard (cube) mesh surface from a scalar value or range
+
+scalar.fill.t // fill line t values with scalar values
+scalar.fill.t.mean // fill line t values with scalar mean (around -1..1) values
+scalar.fill.t.sd // fill line t values with scalar sd (around -1..1) values
+scalar.tetrahedron 128 // generate a tetrahedron mesh (in line) from a scalar value or range
+scalar.tetrahedron <128, 255> -1000 0.001 // generate a tetrahedron mesh (in line) from a scalar value or range and fill (t-values-1000)*0.001
+scalar.hexahedron 32768 // generate a hexahedron mesh (in line) from a scalar value or range
+scalar.hexahedron <32768, 65535> -1000 0.001 // generate a hexahedron mesh (in line) from a scalar value or range and fill (t-values-1000)*0.001
+
+scalar.getpoint <10, 100> // points – stored in line as points (t = value)
+scalar.getpoint <10, 100> 10 // points – stored in line as points (t = 10)
+scalar.getgradient <10, 100> // local gradient vectors – stored in line as vectors (t = value from – to)
+scalar.getgradient <10, 100> 10 // local gradient vectors – stored in line as vectors (t = 10)
+scalar.getskeleton // store skeleton in line
+scalar.getray <0, 0, 0> 20 <10, 100> // statistical values from center <0,0,0> with raylength 20 from a scalar value or range – stored as line
+
+// *************************************************
+
+// Note: The bit level is relevant, if a new vector field is created (i.e. vector.new, vector.load or first time vector.use)!
+vector.integer // set vector workspace to (int32 or int64)
+vector.float // set vector workspace to (float80 or float64) (Default)
+vector.24bit // set scalar workspace to 8bit rgb
+
+// Note!: Only properties of "old" are copied if "new" has the size <0,0,0> (from vector.new)
+new := vector.mask old1 scalarmask 0 <1..10> ... // new := if scalarmask = (0 or 1..10 or ...) use old1
+
+vector.add <1,1,1> // all entries + <1,1,1>
+vector.mul <2,2,2> // all entries * <2,2,2>
+
+// Note!: Only properties of "old" are copied if "new" has the size <0,0,0> (from vector.new)
+new := vector.add old1 old2 // new := old1 + old2 // also possible new := old1 + old2
+new := vector.sub old1 old2 // new := old1 - old2 // also possible new := old1 - old2
+new := vector.mean old1 old2 // new := (old1 + old2)/2 // also possible new := (old1 + old2)/2
+
+// Note: ALL following functions using the vectorfield from vector.use!
+vector.use new1 // create a new vector workspace
+vector.swap new1 new2 // swap vectors
+vector.name old1 // rename
+vector.dump // dump vector workspace list
+
+vector.clean // clean vector field - same as vector.new <0, 0, 0>
+vector.new x y z // or <x, y, z> or empty - new vector field (1..x 1..y 1..z)
+vector.offset // set offset to zero
+vector.offset.center // set offset to the field center
+vector.offset <x, y, z> vector.offset // set offset to zero
+vector.scale <x, y, z> // fill matrix with positive scaling
+vector.matrix <x1, y1, z1> <x2, y2, z2> <x3, y3, z3> // scale and rotation matrix
+vector.unflip // set matrix to positive values
+vector.unrotate // set matrix to diagonal matrix
+a := vector.l2g <x, y, z> // local to global coordinates
+a := vector.g2l <x, y, z> // global to local coordinates
+
+vector.load vector.input // load a vector field - (nii, nii.gz or txt)
+vector.load.properties vector.input // overwrite offset and matrix properties for active vector field
+vector.append scalar.input // load a load a vector field - (nii, nii.gz or txt) into a vector field)
+vector.save newfile // save vector field (nii, nii.gz, am or txt) - (int32 or int64), float64
+vector.save newfile <0.5, 0.5, 0.5> // save vector field with vector scaling <0.5, 0.5, 0.5>
+
+// Note: Flip flips also the specific vector axis (except for rgb)
+vector.flip.x
+vector.flip.y
+vector.flip.z
+
+old := vector.make.vector // init vector field with dimensions from the used vector field
+vector.make.scalar // init used scalar field with dimensions from the used vector field
+old := vector.make.scalar // init scalar field with dimensions from the used vector field
+vector.crop <1, 10> // crop vector field to new substack with vector length or range <1, 10>
+new := vector.crop <1, 10> // crop vector field to new substack with vector length or range <1, 10>
+new := vector.crop old1 <1, 10> // crop vector field old1 to new substack with vector length or range <1, 10>
+new := vector.crop old1 mask <1, 10> // crop vector field old1 to new substack with mask value or range <1, 10>
+vector.move <10, 10, 10> <20, 20, 20> <0, 50, 50> // move block (<10, 10, 10> <20, 20, 20>) with <0, 50, 50> to <10, 60, 60>
+vector.copy.method 1 // for downscaling 0=sum(int) 1=mean(default;float) 2=sd(float) 3=min 4=Q.25 5=median 6=Q.75 7=max
+                     // for upscaling 0=block 1=mean(default) 2=sinc
+new := vector.copy // copy vector field to new
+new := vector.copy 0.5 // isometric copy and scale vector field to new
+new := vector.copy <0.5,0.5,1> // anisometric copy and scale vector field to new
+new := vector.resize <100, 100, 100> // anisometric copy and resize vector field to new
+new := vector.substack <10,10,10> <20,20,20> // %(abs & rel) copy a part from vector field to new
+
+vector.norm.min // norm vectors based on min value (int32 = -4294967294..4294967295, int64 = -18446744073709551614..18446744073709551615, float = -1..1)
+vector.norm // norm vectors based on vector length (int32 = -4294967294..4294967295, int64 = -18446744073709551614..18446744073709551615, float = -1..1)
+vector.norm.max // norm vectors based on max value (int32 = -4294967294..4294967295, int64 = -18446744073709551614..18446744073709551615, float = -1..1)
+vector.norm.relative // norm vectors relative to max global vector (int32 = -4294967294..4294967295, int64 = -18446744073709551614..18446744073709551615, float = -1..1)
+vector.setlength 2 // norm vectors and set length to 2
+vector.setlength.relative 2 // norm vectors relative to max global vector and set length to 2
+vector.erase.min 2 // erase vectors (<0,0,0>) with length < 2
+vector.erase.max 2 // erase vectors (<0,0,0>) with length > 2
+
+vector.background
+vector.cleanup // remove vector, if it nears to background vector 
+vector.direction // look at <1,1,1>
+vector.inverse // 1/v
+vector.softsmooth 1 // midpoint is stronger
+vector.smooth 4 // 4 times smooth the vector field
+vector.hardsmooth 1 // midpoint is weaker
+
+vector.info vector.input out.txt // save header info from nii or .. files.
+vector.histogram // write histogram to stdout
+vector.histogram.image histogram.pgm // save histogram image
+vector.histogram.raw histogram.txt // save histogram vector lengths
+vector.analysis // write analysis to stdout
+vector.analysis.image analysis.pgm // save histogram + analysis image
+vector.analysis.raw analysis.txt // save histogram + analysis vector lengths
+
+vector.gradient overview.pgm // overview with decreasing gradient vector as rgb
+vector.hull overview.pgm // overview from the hull with vector lengths > 0
+vector.low overview.pgm // overview with only the lowest vector lengths
+vector.high overview.pgm // overview with only the highest vector lengths
+vector.xray overview.pgm // overview with the mean vector as rgb
+vector.color overview.pgm // overview with the mean colorized vector lengths
+vector.count overview.pgm // overview with the cumulative vector lengths
+
+// see image for further properties
+vector.copy.xy 0 // get xy image from vector position %(abs & rel)
+vector.copy.xz 0 // get xz image from vector position %(abs & rel)
+vector.copy.yz 0 // get yz image from vector position %(abs & rel)
+vector.insert.xy 0 // put xy image to vector position %(abs & rel)
+vector.insert.xz 0 // put xz image to vector position %(abs & rel)
+vector.insert.yz 0 // put yz image to vector position %(abs & rel)
+
+vector.fuse // fuse color image stack (vector field along z) with best scalar value to new image value
+
+vector.measure.length // measure length of vectors and store in scalar
+vector.get.x // get x values of vectors and store them in scalar
+vector.get.y // get y values of vectors and store them in scalar
+vector.get.z // get z values of vectors and store them in scalar
+
+vector.factor.distance // Calculate factor distance vector's from the vector field
+
+vector.gettensor // Calculate orientation tensor's from the vector field
+
+vector.stream.seeds 1 // 0:all, 1(default):only at new points, 2:only at new points around -1..1, ...
+vector.stream.snakes 0 // 0(default):all, 1:only for new points, 2:only for new points around -1..1, ...
+vector.stream.steps 1 // streamlines with steps 1(default) (i.e. 0.5 or 2)
+vector.stream.angles 1 // streamlines with segment angle 1°(default) (i.e. 0°, 5°, 10°)
+vector.stream.stop.angle 90 // streamlines stops for wrong directions > 90°(default) (i.e. > 45°)
+vector.stream.stop.length 0 // streamlines stops for too long streamlines (0(default)=diagonal of bounding box)
+vector.stream.stop.contrast 0 // streamlines stops for contrast differences (0(default)=nothing; scalar should be defined)
+
+vector.stream.nodes // calculate stream lines like vector.stream and increments the corresponding scalar value
+
+// Note: Streamlines are stored in the respective coordinate system (offset) with the specified resolution (scale)!
+// Note: Seeds are selected based on the local coordinate system (uneven scaling can cause distortion)!
+vector.stream // calculate streamlines for all seed points from a vector field
+vector.stream.random 100 // calculate 100 streamlines
+vector.stream.mask mask 1 <2..10> ... // calculate streamlines for all masked seed points from a vector field
+vector.stream.mask.random 100 mask 1 <2..10> ... // calculate 100 streamlines for masked seed points from a vector field
+vector.stream.muscle // calculate streamlines (only if length left = length right +/- steps) for seed points from a vector field
+vector.stream.muscle.random 100 // calculate 100 streamlines (only if length left = length right +/- steps) for seed points from a vector field
+vector.stream.muscle.mask mask 1 <2..10> ... // calculate streamlines (only if length left = length right +/- steps) for all masked seed points from a vector field
+vector.stream.muscle.mask.random 100 mask 1 <2..10> ... // calculate 100 streamlines (only if length left = length right +/- steps) for all masked seed points from a vector field
+// Note: A zero point <0,0,0> calculates the center point of your stack!
+vector.stream.slice <10, 10, 10> <1, 1, 0> // calculate streamlines for all seed points on a plane (point*normal) from a vector field
+vector.stream.slicex 10 // calculate streamlines for all seed points on the x plane (value*<1,0,0>) from a vector field
+vector.stream.slicey 10 // calculate streamlines for all seed points on the y plane (value*<0,1,0>) from a vector field
+vector.stream.slicez 10 // calculate streamlines for all seed points on the z plane (value*<0,0,1>) from a vector field
+vector.stream.slice.mask <10, 10, 10> <1, 1, 0> mask 1 <2..10> ... // calculate streamlines for all masked seed points on a plane (point*normal) from a vector field
+vector.stream.slicex.mask 10 mask 1 <2..10> ... // calculate streamlines for all masked seed points on the x plane (value*<1,0,0>) from a vector field
+vector.stream.slicey.mask 10 mask 1 <2..10> ... // calculate streamlines for all masked seed points on the y plane (value*<0,1,0>) from a vector field
+vector.stream.slicez.mask 10 mask 1 <2..10> ... // calculate streamlines for all masked seed points on the z plane (value*<0,0,1>) from a vector field
+
+vector.line // get vectors from a vector field (without <0, 0, 0>)
+
+// *************************************************
+
+// Note: The bit level is relevant, if a new tensor field is created (i.e. tensor.new, tensor.load or first time tensor.use)!
+tensor.integer // set tensor workspace to (int32 or int64)
+tensor.float // set tensor workspace to (float80 or float64) (Default)
+
+// Note!: Only properties of "old" are copied if "new" has the size <0,0,0> (from tensor.new)
+new := tensor.mask old1 scalarmask 0 <1,10> ... // new := if scalarmask = (0 or 1..10 or ...) use old1
+
+tensor.mul <1,1,1> <-1,-1,1> // trace corner * all entries // <1,1,1> <-1,-1,1> -> flip.x
+
+// Note: ALL following functions using the tensorfield from tensor.use!
+tensor.use new1 // create a new tensor workspace
+tensor.swap new1 new2 // swap tensors
+tensor.name old1 // rename
+tensor.dump // dump tensor workspace list
+
+tensor.clean // clean tensor field - same as tensor.new <0, 0, 0>
+tensor.new x y z // or <x, y, z> or empty - new tensor field (1..x 1..y 1..z)
+tensor.offset // set offset to zero
+tensor.offset.center // set offset to the field center
+tensor.offset <x, y, z> tensor.offset // set offset to zero
+tensor.scale <x, y, z> // fill matrix with positive scaling
+tensor.matrix <x1, y1, z1> <x2, y2, z2> <x3, y3, z3> // scale and rotation matrix
+tensor.unflip // set matrix to positive values
+tensor.unrotate // set matrix to diagonal matrix
+a := tensor.l2g <x, y, z> // local to global coordinates
+a := tensor.g2l <x, y, z> // global to local coordinates
+
+tensor.load tensor.input // load a tensor field - (nii or nii.gz)
+tensor.load.properties tensor.input // overwrite offset and matrix properties for active tensor field
+tensor.append tensor.input // load a tensor field - (nii or nii.gz) into a tensor field)
+tensor.save newfile // save tensor field (nii, nii.gz, nhdr or nrrd) - (int32 or int64), float64
+
+// Note: Flip flips also the specific tensor axis
+tensor.flip.x
+tensor.flip.y
+tensor.flip.z
+
+old := tensor.make.tensor // init tensor field with dimensions from the used tensor field
+tensor.make.scalar // init used scalar field with dimensions from the used tensor field
+old := tensor.make.scalar // init scalar field with dimensions from the used tensor field
+tensor.move <10, 10, 10> <20, 20, 20> <0, 50, 50> // move block (<10, 10, 10> <20, 20, 20>) with <0, 50, 50> to <10, 60, 60>
+tensor.copy.method 1 // for downscaling 0=sum(int) 1=mean(default;float) 2=sd(float) 3=min 4=Q.25 5=median 6=Q.75 7=max
+                     // for upscaling 0=block 1=mean(default) 2=sinc
+new := tensor.copy // copy tensor field to new
+new := tensor.copy 0.5 // isometric copy and scale tensor field to new
+new := tensor.copy <0.5, 0.5, 1> // anisometric copy and scale tensor field to new
+new := tensor.resize <100, 100, 100> // anisometric copy and resize tensor field to new
+new := tensor.substack <10, 10, 10> <20, 20, 20> // %(abs & rel) copy a part from tensor field to new
+
+tensor.info tensor.input out.txt // save header info from nii or .. files.
+
+tensor.measure.e1 // Calculate first eigenvalue – result stored in scalar
+tensor.measure.e2 // Calculate second eigenvalue – result stored in scalar
+tensor.measure.e3 // Calculate third eigenvalue – result stored in scalar
+tensor.measure.fa // Calculate fractional anisotropy – result stored in scalar
+tensor.measure.ra // Calculate relative anisotropy – result stored in scalar
+tensor.measure.md // Calculate mean/trace anisotropy – result stored in scalar
+tensor.measure.axial // Calculate axial anisotropy (same as e1) – result stored in scalar
+tensor.measure.radial // Calculate radial anisotropy (e2+e3)/2 – result stored in scalar
+tensor.measure.linear // Calculate linear anisotropy (e1-e2)/e1 – result stored in scalar
+tensor.measure.planar // Calculate planar anisotropy (e2-e3)/e1 – result stored in scalar
+tensor.measure.spherical // Calculate spherical anisotropy e3/e1 – result stored in scalar
+tensor.measure.vr // Calculate volume ratio – result stored in scalar
+
+tensor.eigenvalues // Calculate eigenvalues – result stored in vector
+tensor.westin // Calculate Westin-measures (linear,planar,spherical) – result stored in vector
+tensor.eigenvector.max // Calculate first eigenvector – result stored in vector
+tensor.eigenvector.mid // Calculate second eigenvector – result stored in vector
+tensor.eigenvector.min // Calculate third eigenvector – result stored in vector
+
+// *************************************************
+
+mesh.use new1 // create a new mesh workspace
+mesh.swap new1 new2 // swap meshes
+mesh.name old1 // rename
+mesh.dump // dump mesh workspace list
+
+mesh.clean // same as mesh.new
+mesh.new
+
+mesh.load mesh.input // load a mesh file (obj, dxf, stl, ply, iv, vrml)
+mesh.digits 0 // (for save (obj, ply): 0:full digits(default); 1:1 2:1.1 ...)
+mesh.save newfile // save a mesh file (obj, dxf, ply, vtp, vtk, mel)
+mesh.save.obj newfile newfile.mat mat1 // special for obj
+mesh.save.mat newfile.mat mat1 1 <1,0.5,0.5> // special for obj // 1:Neon 2:Flat 3:Dissolved 4:Shiny 5:Mirror 6:Glas
+
+mesh.put <1,0,0> <0,1,0> <0,0,1> // put tri point mesh
+mesh.put <1,0,0> <0,1,0> <0,0,1> <1,0,1> // put quad point mesh
+mesh.put <1,0,0> <0,1,0> <0,0,1> <1,1,1> <1,1,1> <1,1,1> // put mesh with normals
+mesh.put.color <1,0,0> <0,1,0> <0,0,1> <1,0,0> // put tri point mesh in red
+mesh.put.color <1,0,0> <0,1,0> <0,0,1> <1,0,1> <1,0,0> // put quad point mesh in red
+mesh.put.color <1,0,0> <0,1,0> <0,0,1> <1,1,1> <1,1,1> <1,1,1> <1,0,0> // put mesh with normals in red
+
+new := mesh.copy // copy mesh to new
+new := mesh.copy 0.5 // isometric copy and scale mesh to new
+new := mesh.copy <0.5, 0.5, 1> // anisometric copy and scale mesh to new
+
+mesh.verification
+mesh.split transform.split // ignored if 0
+mesh.softsmooth transform.smooth // ignored if 0
+mesh.smooth transform.smooth // ignored if 0
+mesh.hardsmooth transform.smooth // ignored if 0
+
+mesh.adjust 3 // adjust to xy-plane with 3 steps
+mesh.adjust5 3 // for 5% of points
+mesh.adjust10 3 // for 10% of points
+mesh.adjust15 3 // for 15% of points
+
+mesh.clear.x
+mesh.clear.y
+mesh.clear.z
+mesh.mirror.x
+mesh.mirror.y
+mesh.mirror.z
+mesh.abs.x
+mesh.abs.y
+mesh.abs.z
+mesh.swap.xy
+mesh.swap.xz
+mesh.swap.yz
+
+mesh.rotate mesh.transform.rotate // ignored if angles <0,0,0>
+mesh.rotate.vector <1, 0, 0> <0, 1, 0> // rotate mesh from <1, 0, 0> to <0, 1, 0> direction
+mesh.translate mesh.transform.translate // ignored if <0,0,0>
+mesh.scale mesh.transform.scale // ignored if <1,1,1>
+mesh.rotate.relative <0, 0, 0> mesh.transform.rotate // ignored if angles <0,0,0>
+mesh.rotate.vector.relative <0, 0, 0> <1, 0, 0> <0, 1, 0> // rotate mesh relative from <1, 0, 0> to <0, 1, 0> direction
+mesh.translate.relative <0, 0, 0> mesh.transform.translate // ignored if <0,0,0>
+mesh.scale.relative <0, 0, 0> mesh.transform.scale // ignored if <1,1,1>
+
+mesh.set.pivot.zero
+mesh.set.pivot.center // from dimension
+mesh.set.pivot.gravity // from all vertex point
+mesh.set.pivot <1, 1, 1>
+print mesh.pivot // filled with mesh.set...
+mesh.center // move pivot to zero
+mesh.recenter // move zero to pivot
+mesh.rotate.pivot mesh.transform.rotate // ignored if <0,0,0>
+mesh.translate.pivot mesh.transform.translate // ignored if <0,0,0>
+mesh.scale.pivot mesh.transform.scale // ignored if <1,1,1>
+
+mesh.normal.recalc // recalculate normals
+mesh.normal.ortho // recalculate orthogonal aligned normals
+mesh.normal.scale 2.5 // scale normals by 2.5
+mesh.normal.norm // norm normals
+mesh.normal.remove // remove normals
+
+mesh.normal.flip // flip normals (-1*normal)
+mesh.face.flip // flip faces (change index order)
+
+mesh.add.camera <1600,900>
+mesh.add.camera.focus <1600,900> <0,0,1>
+mesh.add.camera.tube <1600,900>
+mesh.add.camera.tube.focus <1600,900> <0,0,0>
+new := mesh.render // projection of colors and depths on new mesh (camera) colors and normals
+new := mesh.render 100 // projection of colors and depths with limit ray length 100
+new := mesh.render.color // projection of colors on new colors
+new := mesh.render.depth // projection of depths on new normals
+new := mesh.render.uv // projection of uvs on new colors
+mesh.projection.color <1600,900> // draw mesh color into image (see camera)
+
+mesh.projection.uv.back false // false (default) ignore negative depth values (background / reverse side)
+mesh.projection.uv.fill.holes 1 2 // interations: 1 (default) neighbors: 2 (default) // neighbors sides 1..4 or corners 1..4
+mesh.projection.uv.results 0 // additional data in: 0 not (default), 1 (uv or depth) in scalar, 2 orientation in vector, 3 scalar + vector, 4 (uv + orientation) in line, 5 scalar + line, 6 vector + line, 7 scalar + vector + line
+new := mesh.projection.uv.orientation <1600,900> // draw uv.orientation (image.use) with mesh into new (image)
+new := mesh.projection.uv <-20,-11,-11> <0,22,0> <0,0,22> // (basepoint, up, rigth) draw uv (image.use) with mesh into new (image)
+new := mesh.projection.uv.tube <0,11,0> <0,-22,0> <-11,0,0> <0,0,11> // (basepoint, height, r1, r2) draw uv (image.use) with mesh into new (image)
+
+mesh.draw // draw mesh into scalar
+mesh.draw.obj test.obj // draw mesh direct from an obj-file (decrease intensity value for every object)
+
+mesh.color <1,0,0> // colorize
+mesh.color.normal <1,0,0> // angle (0..pi) between normals and <1,0,0>
+
+// For all following color commands
+mesh.normal.method 1 // in the direction of the normal vector (nv): 0=sum 1=mean(default) 2=sd 3=min 4=Q.25 5=median 6=Q.75 7=max
+mesh.normal.inverse false // inverse direction of normal vector (default false)
+mesh.normal.min 0 // min value for color 0 (default min=0&max=0 = auto)
+mesh.normal.max 1000 // max value for color 1 (default min=0&max=0 = auto)
+
+mesh.color.curvature
+
+mesh.getdensity 2.5 // density (with max. depth 2.5) in scalar on vertex points stored in normal vector
+mesh.getdensity.color 2.5 // density (with max. depth 2.5) in scalar on vertex points stored in color vector
+mesh.getthickness 2.5 1000 // thickness (with max. depth 2.5 with threshold 1000) in scalar on vertex points stored in normal vector
+mesh.getthickness.color 2.5 1000 // thickness (with max. depth 2.5 with threshold 1000) in scalar on vertex points stored in color vector
+mesh.getcount 2.5 <10,1000> // count values (with max. depth 2.5 inside values <10,100>) in scalar on vertex points stored in normal vector
+mesh.getcount.color 2.5 <10,1000> // count values (with max. depth 2.5 inside values <10,100>) in scalar on vertex points stored in color vector
+...
+mesh.getvector 2.5 // orientation [rad] (with max. depth 2.5) in vector on vertex points stored in normal vector
+mesh.getvector.color 2.5 // orientation [rad] (with max. depth 2.5) in vector on vertex points stored in color vector
+mesh.getvector.rgb 2.5 // |xyz| (with max. depth 2.5) in vector on vertex points stored in vector color
+mesh.getvector.length 2.5 // length (with max. depth 2.5) in vector on vertex points stored in normal vector
+mesh.getvector.length.color 2.5 // length (with max. depth 2.5) in vector on vertex points stored in color vector
+...
+mesh.gettensor.e1 2.5 // first eigenvalue (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.e1.color 2.5 // first eigenvalue (with max. depth 2.5) in tensor on vertex points stored in color vector
+mesh.gettensor.e2 2.5 // second eigenvalue (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.e2.color 2.5 // second eigenvalue (with max. depth 2.5) in tensor on vertex points stored in color vector
+mesh.gettensor.e3 2.5 // third eigenvalue (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.e3.color 2.5 // third eigenvalue (with max. depth 2.5) in tensor on vertex points stored in color vector
+...
+mesh.gettensor.fa 2.5 // fractional anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.fa.color 2.5 // fractional anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+mesh.gettensor.ra 2.5 // relative anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.ra.color 2.5 // relative anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+mesh.gettensor.md 2.5 // mean anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.md.color 2.5 // mean anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+...
+mesh.gettensor.axial 2.5 // axial anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.axial.color 2.5 // axial anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+mesh.gettensor.radial 2.5 // radial anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.radial.color 2.5 // radial anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+...
+mesh.gettensor.linear 2.5 // linear anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.linear.color 2.5 // linear anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+mesh.gettensor.planar 2.5 // planar anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.planar.color 2.5 // planar anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+mesh.gettensor.spherical 2.5 // spherical anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.spherical.color 2.5 // spherical anisotropy [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+...
+mesh.gettensor.vr 2.5 // volume ratio [%] (with max. depth 2.5) in tensor on vertex points stored in normal vector
+mesh.gettensor.vr.color 2.5 // volume ratio [%] (with max. depth 2.5) in tensor on vertex points stored in color vector
+...
+mesh.gettensor.westin 2.5 // westin [rgb] (with max. depth 2.5) in tensor on vertex points stored in color vector
+mesh.gettensor.westin.rank 2.5 // westin ranked [rgb] (with max. depth 2.5) in tensor on vertex points stored in color vector
+
+// *************************************************
+
+line.use new1 // create a new line workspace
+line.swap new1 new2 // swap lines
+line.name old1 // rename
+line.dump // dump line workspace list
+
+line.clean // same as line.new
+line.new
+
+line.load line.input // load a cloud2 file
+line.load line.input 20 // load only 20 % randomly from a cloud2 file
+line.save newfile // save lines (obj, dxf, trk, mel, mv3d, swc or txt)
+line.save.obj newfile // save lines (obj file) for Blender, 3D Slicer, ...
+line.save.dxf newfile // save lines (dxf file) for CAD-software
+line.save.vtk newfile // save lines (vtp, vtk file) for 3D Slicer
+line.save.trackvis newfile // save lines (trk file) for TrackVis
+line.save.maya newfile // save lines (mel file) for Maya
+line.save.mv3d newfile // save lines (txt file) for MicroVisu3D
+line.save.swc newfile // save lines (swc file)
+line.save.txt newfile // save lines (txt file)
+
+new := line.copy // copy line to new
+new := line.copy 0.5 // isometric copy and scale line to new
+new := line.copy <0.5, 0.5, 1> // anisometric copy and scale line to new – preserve t
+new := line.copy <0.5, 0.5, 1, 2> // anisometric copy and scale line to new
+
+line.center // center all
+line.center.objects // center objects
+
+line.number // store point number in t
+line.distance // store near distance in t
+line.length // store line length from the origin in t
+
+line.mean.t // calculate the mean of all t values on lines
+line.sd.t // calculate the SD of all t values on lines
+line.min.t // calculate min of all t values on lines
+line.median.t // calculate the median of all t values on lines
+line.max.t // calculate max of all t values on lines
+
+line.erase.duplicates // erase duplicates lines, vectors or points
+line.erase.duplicates.near 1 // erase near lines, vectors or points
+line.erase.duplicates.origin 1 // erase near origin lines, vectors or points
+line.mean.duplicates.near 1 // mean near points
+
+line.erase.t.min 10 // erase all lines with t < 10
+line.erase.t.max 90 // erase all lines with t > 90
+
+line.erase.length.min 10 // erase all lines with length < 10
+line.erase.length.max 90 // erase all lines with length > 90
+
+line.discrete 1 // <1.2,2.3,4.7,4.5> -> <1,2,5,5> // 1*(value/1)
+line.discrete.3d 1 // <1.2,2.3,4.7,4.5> -> <1,2,5,4.5>
+
+line.vector.norm // norm vectors
+line.vector.normscale 2 // norm and scale vectors
+line.vector.scale 2 // scale vectors
+line.vector.minscale // scale vectors to 1/(min vector)
+line.vector.maxscale // scale vectors to 1/(max vector)
+line.vector.negate // negate (-1*) vectors
+line.vector.invert // invert (1/) vectors
+
+line.draw.value // set draw to scalar.value
+line.draw.value.t // set draw to scalar.value*t
+line.draw.t // set draw to t
+
+line.draw.point // draw points into scalar
+line.draw.point.solid // draw solid points into scalar
+line.draw.sphere 3 // draw sphere with radius 3 into scalar
+line.draw.sphere.solid 3 // draw solid sphere with radius 3 into scalar
+line.draw.cube 3 // draw cube with radius 3 into scalar
+line.draw.cube.solid 3 // draw solid cube with radius 3 into scalar
+line.draw.line // draw lines into scalar
+line.draw.line.solid // draw solid lines into scalar
+line.draw // draw points or lines into scalar
+line.draw.solid // draw solid points or lines into scalar
+
+// For more line commands, look at Cloud2!
+

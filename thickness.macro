@@ -1,0 +1,37 @@
+//!./imagexd
+ 
+thread.max := 40
+ 
+io.dirs.complete * // load all sub dirs into a dir list
+io.files "*AX3D.nii.gz" // load all files from sub dirs into a file list
+io.files.sort
+ 
+for io.files.length // for all files
+	id := io.files.getdir
+	x $= 2 id
+	y $= -7 id	
+ 
+	ifone @x=13 @x=14
+	then
+	scalar.use muscle
+	scalar.new
+	a := x "-" y / "mask_XX.nii.gz"
+	scalar.load a
+	scalar.sethigher 1 1
+ 
+	scalar.fullscan false
+	new := scalar.measure.thickness 60
+	scalar.new
+	
+	scalar.use new
+	a := "Thickness" / x "-" y " thickness.nii.gz"
+	scalar.save a
+	scalar.new
+	end	
+
+	io.files.next
+end
+ 
+// saved on date 20.1.2026 | time 17:20:26:255 h
+// saved on date 22.1.2026 | time 17:4:45:683 h
+// saved on date 28.1.2026 | time 11:3:3:471 h

@@ -1,0 +1,243 @@
+//!./imagexd
+ 
+var m0 m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11
+var input input_dir
+ 
+procedure doit
+	scalar.use mrt_bones
+	scalar.new
+	b $= 2 input_dir
+	a $= -7 input_dir	
+	//not necessary for stat_sub_dis
+	//file := "Bones/" b "-" a " Segmentation-Bones.nii.gz"
+	//scalar.load file // old coordinate system
+ 
+	c := input_dir "/"
+	// rechte Auge
+	a := blob.pos "@cF_1.mrk.json" '"position": ['
+	F_1 := blob.get "@cF_1.mrk.json" @a+13 255 "]"
+	ifzero F_1 // if fail -------
+	then
+		a := blob.pos "@cF.mrk.json" '"position": ['
+		F_1 := blob.get "@cF.mrk.json" @a+13 255 "]"
+		ifzero F_1
+		then
+			  a := blob.pos "@cF_auge rechts oben.mrk.json" '"position": ['
+			  F_1 := blob.get "@cF_auge rechts oben.mrk.json" @a+13 255 "]"			
+			ifzero F_1
+			then
+				  a := blob.pos "@cF_auge re oben.mrk.json" '"position": ['
+				  F_1 := blob.get "@cF_auge re oben.mrk.json" @a+13 255 "]"			
+			end
+		end
+	end
+	F_1 *= F_1 <-1,-1,1>
+	F_1 := scalar.g2l F_1
+	F_1 *= F_1 <2,2,2>
+	a := blob.pos "@cF_2.mrk.json" '"position": ['
+	F_2 := blob.get "@cF_2.mrk.json" @a+13 255 "]"
+	ifzero F_2
+	then
+		a := blob.pos "@cF_auge rechts unten.mrk.json" '"position": ['
+		F_2 := blob.get "@cF_auge rechts unten.mrk.json" @a+13 255 "]"
+		ifzero F_2
+		then
+			a := blob.pos "@cF_auge re unten.mrk.json" '"position": ['
+			F_2 := blob.get "@cF_auge re unten.mrk.json" @a+13 255 "]"
+		end
+	end
+	ifnotzero F_2
+	then
+		F_2 *= F_2 <-1,-1,1>
+		F_2 := scalar.g2l F_2
+		F_2 *= F_2 <2,2,2>
+	end
+	else
+		F_2 := F_1 // to remove wrong vector 
+	end 
+ 
+	// linke Auge	
+	a := blob.pos "@cF_8.mrk.json" '"position": ['
+	F_8 := blob.get "@cF_8.mrk.json" @a+13 255 "]"
+	ifzero F_8
+	then
+		a := blob.pos "@cF_auge links oben.mrk.json" '"position": ['
+		F_8 := blob.get "@cF_auge links oben.mrk.json" @a+13 255 "]"
+		ifzero F_8
+		then
+			a := blob.pos "@cF_auge li oben.mrk.json" '"position": ['
+			F_8 := blob.get "@cF_auge li oben.mrk.json" @a+13 255 "]"
+		end
+	end
+	F_8 *= F_8 <-1,-1,1>
+	F_8 := scalar.g2l F_8
+	F_8 *= F_8 <2,2,2>
+	a := blob.pos "@cF_7.mrk.json" '"position": ['
+	F_7 := blob.get "@cF_7.mrk.json" @a+13 255 "]"
+	ifzero F_7
+	then
+		a := blob.pos "@cF_auge links unten.mrk.json" '"position": ['
+		F_7 := blob.get "@cF_auge links unten.mrk.json" @a+13 255 "]"
+		ifzero F_7
+		then
+			a := blob.pos "@cF_auge li unten.mrk.json" '"position": ['
+			F_7 := blob.get "@cF_auge li unten.mrk.json" @a+13 255 "]"
+		end
+	end
+	ifnotzero F_7
+	then
+		F_7 *= F_7 <-1,-1,1>
+		F_7 := scalar.g2l F_7
+		F_7 *= F_7 <2,2,2>
+	end
+	else
+		F_7 := F_8 // to remove wrong vector
+	end
+ 
+	// Nase
+	a := blob.pos "@cF_9.mrk.json" '"position": ['
+	F_9 := blob.get "@cF_9.mrk.json" @a+13 255 "]"
+	F_9 *= F_9 <-1,-1,1>
+	F_9 := scalar.g2l F_9
+	F_9 *= F_9 <2,2,2>
+	a := blob.pos "@cF_10_new.mrk.json" '"position": ['
+	F_10 := blob.get "@cF_10_new.mrk.json" @a+13 255 "]"
+	ifzero F_10 // if fail -------
+	then
+		a := blob.pos "@cF_10.mrk.json" '"position": ['
+		F_10 := blob.get "@cF_10.mrk.json" @a+13 255 "]"
+		ifzero F_10 
+		then
+			F_10 := stack : F_2 F_7 + <2,2,2> / F_9 - <2,2,2> * F_9 +
+		end
+	end
+	F_10 *= F_10 <-1,-1,1>
+	F_10 := scalar.g2l F_10
+	F_10 *= F_10 <2,2,2>
+ 
+	// Jochbein
+	a := blob.pos "@cF_15.mrk.json" '"position": ['
+	F_15 := blob.get "@cF_15.mrk.json" @a+13 255 "]"
+	ifzero F_15 // if fail -------
+	then
+		F_15 := F_7
+	end
+	F_15 *= F_15 <-1,-1,1>
+	F_15 := scalar.g2l F_15
+	F_15 *= F_15 <2,2,2>
+	a := blob.pos "@cF_16.mrk.json" '"position": ['
+	F_16 := blob.get "@cF_16.mrk.json" @a+13 255 "]"
+	ifzero F_16 // if fail -------
+	then
+		F_16 := F_2
+	end
+	F_16 *= F_16 <-1,-1,1>
+	F_16 := scalar.g2l F_16
+	F_16 *= F_16 <2,2,2>
+ 
+	// Foramen
+	a := blob.pos "@cF_5.mrk.json" '"position": ['
+	F_5 := blob.get "@cF_5.mrk.json" @a+13 255 "]"
+	F_5 *= F_5 <-1,-1,1>
+	F_5 := scalar.g2l F_5
+	F_5 *= F_5 <2,2,2>
+	a := blob.pos "@cF_6.mrk.json" '"position": ['
+	F_6 := blob.get "@cF_6.mrk.json" @a+13 255 "]"
+	F_6 *= F_6 <-1,-1,1>
+	F_6 := scalar.g2l F_6
+	F_6 *= F_6 <2,2,2>
+ 
+	// Kinn
+	a := blob.pos "@cF_13.mrk.json" '"position": ['
+	F_13 := blob.get "@cF_13.mrk.json" @a+13 255 "]"
+	F_13 *= F_13 <-1,-1,1>
+	F_13 := scalar.g2l F_13
+	F_13 *= F_13 <2,2,2>
+	a := blob.pos "@cF_14.mrk.json" '"position": ['
+	F_14 := blob.get "@cF_14.mrk.json" @a+13 255 "]"
+	F_14 *= F_14 <-1,-1,1>
+	F_14 := scalar.g2l F_14
+	F_14 *= F_14 <2,2,2>
+	
+	eye_right := stack : F_1 F_2 + <2,2,2> / 
+	eye_right_v := stack : F_1 F_2 -
+	eye_left := stack : F_8 F_7 + <2,2,2> / 
+	eye_left_v := stack : F_8 F_7 - 
+	eye_up := stack : F_1 F_8 + <2,2,2> / 
+	eye_up_v := stack : F_1 F_8 - 
+	eye_down := stack : F_2 F_7 + <2,2,2> / 
+	eye_down_v := stack : F_2 F_7 - 
+ 
+	nase := stack : F_9 F_10 + <2,2,2> / 
+	nase_v := stack : F_9 F_10 - 
+ 
+	jochbein := stack : F_16 F_15 + <2,2,2> / 
+	jochbein_v := stack : F_16 F_15 - 
+ 
+	kinn := stack : F_14 F_13 + <2,2,2> / 
+	kinn_v := stack : F_14 F_13 -
+ 
+	foramen := stack : F_5 F_6 + <2,2,2> / 
+	foramen_v := stack : F_5 F_6 - 
+ 
+	mediolateral := stack : eye_up_v eye_down_v jochbein_v + + <3,3,3> / <-1,-1,-1> *
+	craniocaudal := stack : eye_left_v eye_right_v nase_v + + <3,3,3> /
+ 
+	nase_kinn_v := stack F_10 kinn -
+	left_kinn_v := stack F_15 kinn -
+	right_kinn_v := stack F_16 kinn -
+ 
+	m1 := stack eye_up |
+	m2 := stack eye_down |
+	m3 := stack eye_left |
+	m4 := stack eye_right |
+	m5 := stack nase_v |
+	m6 := stack jochbein_v |
+	m7 := stack foramen_v |
+	m8 := stack kinn_v |
+	m9 := stack nase_kinn_v |
+	m10 := stack left_kinn_v |
+	m11 := stack right_kinn_v |
+end
+ 
+io.dirs.complete * // load all sub dirs into a dir list
+print io.dirs.length
+io.files "mask*XX.nii.gz" // load all files from sub dirs into a file list
+io.files.sort
+ 
+for io.files.length // for all files
+print io.files.getdir / io.files.getfile
+end
+ 
+output.store "stat_sub_dis.csv"
+ 
+print "ID" #9 "eye_up" #9 "eye_down" #9 "eye_left" #9 "eye_right" #9 "nase" #9 "jochbein" #9 "foramen" #9 "kinn" #9 "nase_kinn" #9 "left_kinn" #9 "right_kinn"
+ 
+for io.files.length // for all files
+	input :=  io.files.getname
+	input_dir := io.files.getdir
+ 
+	rater $= -9 io.files.getfile
+	rater $= 2 rater
+	id := io.files.getdir "_" rater
+  
+	doit // it used scalar bones	
+ 
+	print id #9 m1 #9 m2 #9 m3 #9 m4 #9 m5 #9 m6 #9 m7 #9 m8 #9 m9 #9 m10 #9 m11
+ 
+	io.files.next
+end
+ 
+end
+// saved on date 2.5.2025 | time 11:38:42:473 h
+// saved on date 5.5.2025 | time 9:27:50:517 h
+// saved on date 20.6.2025 | time 14:53:13:872 h
+// saved on date 1.7.2025 | time 10:58:52:129 h
+// saved on date 1.7.2025 | time 15:56:50:825 h
+// saved on date 2.7.2025 | time 16:26:0:512 h
+// saved on date 8.7.2025 | time 15:46:21:146 h
+// saved on date 9.7.2025 | time 10:27:4:711 h
+// saved on date 20.8.2025 | time 16:7:31:877 h
+// saved on date 28.1.2026 | time 9:34:26:705 h
+// saved on date 29.1.2026 | time 9:7:50:877 h
+// saved on date 26.3.2026 | time 15:47:56:241 h

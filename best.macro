@@ -1,0 +1,48 @@
+//!./imagexd
+ 
+io.dirs.complete * // load all sub dirs into a dir list
+io.dirs.sort
+ 
+for io.dirs.length // for all files
+	io.files "mask*.nii.gz" // load all files from sub dirs into a file list
+	io.files.sub "mask_sub.nii.gz"
+	io.files.sub "mask_XX.nii.gz"
+	io.files.sub "mask_X3.nii.gz"
+	io.files.sub "mask_*split.nii.gz"
+ 
+	scalar.use mask
+	scalar.new
+ 
+	count := 0
+	for io.files.length
+		ifsame io.dirs.get io.files.getdir
+		then
+			scalar.use dummy
+			scalar.new
+			a := io.workdir / io.dirs.get / io.files.getfile
+			scalar.load a
+			scalar.sethigher 1 1 // falls Grauwerte
+ 
+			mask := scalar.add mask dummy
+			count += count 1
+		end
+		io.files.next
+	end 
+ 
+	ifequal count 2
+	then
+		scalar.use mask
+		scalar.setvalue 1 0
+		a := io.workdir / io.dirs.get / "mask_XX.nii.gz"
+		scalar.save a
+	end
+	else
+		// stop
+	end
+ 
+	io.dirs.next
+end
+// saved on date 2.5.2025 | time 11:38:42:473 h
+// saved on date 5.5.2025 | time 9:27:50:517 h
+// saved on date 8.5.2025 | time 17:5:9:658 h
+// saved on date 21.11.2025 | time 14:44:33:859 h

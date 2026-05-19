@@ -1,0 +1,50 @@
+//!./imagexd
+ 
+io.dirs.complete * // load all sub dirs into a dir list
+io.files "*AX3D.nii.gz" // load all files from sub dirs into a file list
+io.files.sort
+ 
+output.store "stat_bone.csv"
+ 
+print "ID" #9 "Count1" #9 "Count2" #9 "Density_Mean" #9 "Density_SD" #9 "Density_Min" #9 "Density_Q.25" #9 "Density_Median" #9 "Density_Q.75" #9 "Density_Max"
+ 
+for io.files.length // for all files
+	id := io.files.getdir
+	x $= 2 id
+	y $= -7 id	
+
+	scalar.use mask
+	scalar.new
+	a := "CTBone" / x " " y " Segmentation_1-bone-label.nii.gz"
+	scalar.load a
+	count1 := scalar.count 32769
+
+	scalar.use convex
+	scalar.new
+	a := "CTBone" / x " " y " Segmentation_2-bone-label.nii.gz"
+	scalar.load a
+	count2 := scalar.count 1 3
+
+	scalar.use ct
+	scalar.new
+	a := id /  io.files.getfile
+	scalar.load.filter 0 1
+	scalar.load a
+	
+	new := scalar.mask ct mask 32769
+	scalar.use new
+	density1 := scalar.statistic 1 2000 // only over zero 
+	density2 := scalar.quantile 1 2000 // only over zero 
+	scalar.new
+	
+	print id #9 count1 #9 count2 #9 density1 #9 density2
+ 
+	io.files.next
+end
+ 
+end
+// saved on date 2.5.2025 | time 11:38:42:473 h
+// saved on date 5.5.2025 | time 9:27:50:517 h
+// saved on date 3.9.2025 | time 16:12:4:942 h
+// saved on date 21.11.2025 | time 14:1:43:393 h
+// saved on date 13.1.2026 | time 14:32:30:269 h
