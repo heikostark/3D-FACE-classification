@@ -1085,7 +1085,7 @@ See LICENSE file for full terms and conditions.
 ## Author and Attribution
 
 **Heiko Stark**  
-Department of Medical Imaging and Simulation  
+Institute of Zoology and Evolutionary Research  
 University of Jena
 
 **Research Interests:**
