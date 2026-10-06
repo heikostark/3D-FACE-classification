@@ -4,7 +4,7 @@
 
 A comprehensive collection of processing and analysis scripts for automated segmentation, classification, and quantitative characterisation of facial anatomy, muscle groups, and bone structures from 3D MRI data.
 
-Stark H, Jandausch K, Roth A, Biedermann U, Krämer M, Reichenbach JR, Aschenbach R, Volk GF, Fischer MS, Guntinas-Lichius O (2026) The Anatomy of Facial Muscles Revisited: High-Resolution Magnetic Resonance Imaging and Computed Tomography Studies on Body Donors. Journal of Imaging 12(9), 459. DOI:10.3390/jimaging12090459
+Stark H, Jandausch K, Roth A, Biedermann U, Krämer M, Reichenbach JR, Aschenbach R, Volk GF, Fischer MS, Guntinas-Lichius O (2026) The Anatomy of Facial Muscles Revisited: High-Resolution Magnetic Resonance Imaging and Computed Tomography Studies on Body Donors. Journal of Imaging 12(9), 459. DOI:[10.3390/jimaging12090459](https://doi.org/10.3390/jimaging12090459)
 
 ## Overview
 
