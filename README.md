@@ -2,17 +2,19 @@
 
 **Advanced Analysis and Classification of Facial and Mimic Muscle Anatomy using 3D MRI Data**
 
-A comprehensive collection of processing and analysis scripts for automated segmentation, classification, and quantitative characterization of facial anatomy, muscle groups, and bone structures from 3D MRI data.
+A comprehensive collection of processing and analysis scripts for automated segmentation, classification, and quantitative characterisation of facial anatomy, muscle groups, and bone structures from 3D MRI data.
+
+Stark H, Jandausch K, Roth A, Biedermann U, Krämer M, Reichenbach JR, Aschenbach R, Volk GF, Fischer MS, Guntinas-Lichius O (2026) The Anatomy of Facial Muscles Revisited: High-Resolution Magnetic Resonance Imaging and Computed Tomography Studies on Body Donors. Journal of Imaging 12(9), 459. DOI:10.3390/jimaging12090459
 
 ## Overview
 
-**3D-FACE-Classification** is a specialized research project focused on the detailed analysis, segmentation, and classification of facial anatomy from high-resolution 3D MRI (Magnetic Resonance Imaging) datasets. The project provides an automated pipeline for:
+**3D-FACE-Classification** is a specialised research project focused on the detailed analysis, segmentation, and classification of facial anatomy from high-resolution 3D MRI (Magnetic Resonance Imaging) datasets. The project provides an automated pipeline for:
 
 - **Multi-rater segmentation consensus** - Combining independent expert annotations
 - **Muscle group classification** - Categorizing facial musculature into functional groups
 - **Quantitative anatomy** - Measuring tissue thickness, distribution, and spatial relationships
 - **Anatomical variation analysis** - Understanding differences across subjects
-- **Biomechanical characterization** - Analyzing muscle organization for functional understanding
+- **Biomechanical characterization** - Analysing muscle organisation for functional understanding
 
 This project combines medical image analysis, consensus methodology, statistical analysis, and detailed anatomical classification to create comprehensive 3D models of facial anatomy.
 
@@ -23,8 +25,8 @@ This project combines medical image analysis, consensus methodology, statistical
 Understanding facial anatomy is essential for:
 - **Medical research** - Understanding facial function and dysfunction
 - **Surgical planning** - Precise anatomical knowledge for safe intervention
-- **Dermatology** - Muscle-related aging and aging-related changes
-- **Orthodontics** - Masticatory muscle organization and function
+- **Dermatology** - Muscle-related ageing and ageing-related changes
+- **Orthodontics** - Masticatory muscle organisation and function
 - **Speech-language pathology** - Understanding mimic and speech-related muscles
 - **Cosmetic medicine** - Evidence-based approach to facial aesthetics
 
@@ -40,7 +42,7 @@ Understanding facial anatomy is essential for:
 
 ### Multi-Rater Consensus Approach
 
-The project implements best-practices for handling multiple expert annotations:
+The project implements best practices for handling multiple expert annotations:
 - **Rater agreement analysis** - Assessing reproducibility and consistency
 - **Consensus building** - Combining ratings from multiple experts
 - **Inter-rater reliability** - Statistical measures of agreement
@@ -56,9 +58,9 @@ Raw 3D MRI Data
         ↓
 [mrt_orientation.inc] - Coordinate system alignment & landmark detection
         ↓
-[repair_transformation.macro] - Standardize coordinate systems across raters
+[repair_transformation.macro] - Standardise coordinate systems across raters
         ↓
-[rater.macro] - Analyze individual rater segmentations
+[rater.macro] - Analyse individual rater segmentations
         ↓
 [best.macro] - Create consensus from 2+ raters
 [best_x3.macro] - Create consensus from 3+ raters
@@ -78,10 +80,10 @@ Anatomical Classification & Results
 
 ##### 1. **mrt_orientation.inc** - MRI Coordinate System Alignment
 
-**Purpose:** Standardizes MRI coordinate systems and detects anatomical landmarks for consistent spatial orientation.
+**Purpose:** Standardises MRI coordinate systems and detects anatomical landmarks for consistent spatial orientation.
 
 **Key Functions:**
-- Loads bone segmentation in original coordinate system
+- Loads bone segmentation in the original coordinate system
 - Detects anatomical landmarks from marker files (.mrk.json format):
   - Eye landmarks (right eye upper/lower)
   - Anatomical reference points
@@ -100,7 +102,7 @@ Anatomical Classification & Results
   - Additional anatomical markers as needed
 
 **Output:**
-- Standardized coordinate system definition
+- Standardised coordinate system definition
 - Transformation matrices
 - Landmark coordinates in standard space
 
@@ -114,12 +116,12 @@ Coordinate Transformation:
 
 ##### 2. **repair_transformation.macro** - Coordinate System Standardization
 
-**Purpose:** Repairs inconsistencies in coordinate systems used by different raters and standardizes all data to a common reference system.
+**Purpose:** Repairs inconsistencies in coordinate systems used by different raters and standardises all data to a common reference system.
 
 **Key Operations:**
 - Identifies coordinate system deviations
 - Applies correction transformations
-- Standardizes all rater segmentations to a single reference (rater HS - Heiko Stark)
+- Standardises all rater segmentations to a single reference (rater HS - Heiko Stark)
 - Validates transformation accuracy
 - Ensures inter-rater data compatibility
 
@@ -127,14 +129,14 @@ Coordinate Transformation:
 Different raters may use different MRI coordinate system conventions. This script identifies and corrects these differences, ensuring all segmentations are comparable.
 
 **Input:** Individual rater segmentation files with varying coordinate systems
-**Output:** Transformed segmentations in standardized reference frame
+**Output:** Transformed segmentations in a standardised reference frame
 
 ##### 3. **best.macro** - Binary Consensus (2+ Raters)
 
 **Purpose:** Creates a consensus muscle segmentation combining annotations from a minimum of 2 independent raters.
 
 **Key Operations:**
-- Loads all mask files for a subject with file naming convention `mask*.nii.gz`
+- Loads all mask files for a subject with the file naming convention `mask*.nii.gz`
 - Excludes derived files:
   - `mask_sub.nii.gz` (subdivision masks)
   - `mask_XX.nii.gz` (consensus result)
@@ -166,7 +168,7 @@ For each subject directory:
 **Purpose:** Creates a more stringent consensus requiring agreement from 3 or more independent raters.
 
 **Key Operations:**
-- Similar to `best.macro` but requires minimum 3 raters
+- Similar to `best.macro` but requires a minimum of 3 raters
 - Generates `mask_X3.nii.gz` with higher confidence
 - Useful for controversial anatomical regions
 - Better for validation and benchmark datasets
@@ -179,7 +181,7 @@ Consensus = (mask_total ≥ 3) ? 1 : 0
 **Use Cases:**
 - Creating high-quality reference/gold-standard segmentations
 - Validating algorithm performance
-- Analyzing agreement patterns
+- Analysing agreement patterns
 - Identifying anatomically ambiguous regions
 
 #### B. Muscle & Tissue Characterization
@@ -192,7 +194,7 @@ Consensus = (mask_total ≥ 3) ? 1 : 0
 - Loads consensus muscle mask (`mask_XX.nii.gz`)
 - Sets maximum scan length: 60 mm (thickness radius)
 - Computes distance transform via local thickness measurement
-- Applies fullscan=false for optimization (incomplete sphere scans acceptable)
+- Applies fullscan=false for optimisation (incomplete sphere scans acceptable)
 - Saves thickness map: `Thickness/{ID}_thickness.nii.gz`
 - Enables parallel processing (thread.max := 40)
 
@@ -206,12 +208,12 @@ Consensus = (mask_total ≥ 3) ? 1 : 0
 **Input:** Consensus muscle segmentation
 **Output:** 
 - 3D thickness map showing local muscle thickness at each point
-- Unit: millimeters
+- Unit: millimetres
 - Range: 0-60 mm (maximum scan radius)
 
 **Interpretation:**
 - **Low values (0-5 mm):** Thin muscle tissue at boundaries
-- **Medium values (5-15 mm):** Typical mimic muscle thickness
+- **Medium values (5-15 mm):** Typical muscle thickness
 - **High values (15-60 mm):** Thick muscle bundles or muscle groups
 - **Zero values:** Outside muscle region
 
@@ -220,14 +222,14 @@ Consensus = (mask_total ≥ 3) ? 1 : 0
 **Purpose:** Calculates the 3D spatial distance from muscle segmentations to bone surfaces, revealing muscle-to-bone relationships.
 
 **Key Operations:**
-- Computes distance from each muscle voxel to nearest bone boundary
+- Computes distance from each muscle voxel to the nearest bone boundary
 - Generates distance field in 3D space
 - Saves as distance maps for statistical analysis
-- Reveals anatomical muscle organization relative to skeleton
+- Reveals anatomical muscle organisation relative to skeleton
 - Important for understanding functional muscle groups
 
 **Applications:**
-- Analyzing muscle attachment sites
+- Analysing muscle attachment sites
 - Understanding muscle-bone relationships
 - Identifying muscle layers and stratification
 - Biomechanical significance of muscle positioning
@@ -263,7 +265,7 @@ The repository includes comprehensive statistical analysis scripts for multiple 
 
 ##### 8. **stat_rater.macro** - Rater Agreement Analysis
 
-**Purpose:** Analyzes inter-rater agreement and reliability metrics.
+**Purpose:** Analyses inter-rater agreement and reliability metrics.
 
 **Key Operations:**
 - Compares individual rater segmentations against consensus
@@ -327,7 +329,7 @@ The face is subdivided into 16 regions (4 x 4 grid or hierarchical subdivision):
 
 Complete reference documentation for all imagexd macro language commands used throughout the project.
 
-### File Organization
+### File Organisation
 
 **Directory Structure:**
 ```
@@ -431,7 +433,7 @@ Results/
 **NIFTI Format (.nii.gz):**
 - Standard neuroimaging format
 - Includes spatial metadata (voxel spacing, orientation)
-- Gzip compressed for storage efficiency
+- Gzip-compressed for storage efficiency
 - 3D volumetric data support
 - Single or multi-channel support
 
@@ -487,7 +489,7 @@ Maximum scan length: 60 mm
 
 **Distance Measurement:**
 - Euclidean distance in 3D space
-- Computed from each muscle voxel to nearest bone boundary
+- Computed from each muscle voxel to the nearest bone boundary
 - Used for muscle layer/stratification analysis
 
 ## Usage Guide
@@ -501,12 +503,12 @@ Maximum scan length: 60 mm
 
 ### Data Preparation
 
-**Step 1: Organize Input Data**
+**Step 1: Organise Input Data**
 ```
 Create directory structure with subject folders:
 - Each folder contains rater segmentations: mask_HS.nii.gz, mask_KS.nii.gz, etc.
 - Include bone segmentations: Bones/ subdirectory
-- Place marker files in root of subject directory
+- Place marker files in the root of the subject directory
 ```
 
 **Step 2: Run Coordinate Alignment**
@@ -518,7 +520,7 @@ imagexd mrt_orientation.inc
 **Step 3: Repair Coordinate Systems (if needed)**
 ```bash
 imagexd repair_transformation.macro
-# Standardize all rater segmentations to common reference
+# Standardise all rater segmentations to common reference
 ```
 
 ### Main Processing Pipeline
@@ -545,7 +547,7 @@ imagexd distance.macro
 # Generates: Distance/*.nii.gz
 ```
 
-**Step 3: Analyze Individual Raters**
+**Step 3: Analyse Individual Raters**
 ```bash
 # Generate rater-specific statistics
 imagexd rater.macro
@@ -610,7 +612,7 @@ echo "Generating consensus segmentations..."
 imagexd best.macro > consensus.log 2>&1
 imagexd best_x3.macro > consensus_x3.log 2>&1
 
-# Step 4: Tissue characterization
+# Step 4: Tissue characterisation
 echo "Calculating tissue measurements..."
 imagexd thickness.macro > thickness.log 2>&1
 imagexd distance.macro > distance.log 2>&1
@@ -649,7 +651,7 @@ thread.max := 40  # Change to your CPU core count
 **Adjust thickness measurement parameters:**
 ```
 Edit thickness.macro:
-new := scalar.measure.thickness 60  # Change 60 to different max radius
+new := scalar.measure.thickness 60  # Change 60 to a different max radius
 scalar.fullscan false  # Change to true for complete spheres only
 ```
 
@@ -666,18 +668,18 @@ a := "Thickness/" / x "-" y " thickness.nii.gz"
 
 **Facial Pathology:**
 - Understanding muscle degeneration in muscular dystrophies
-- Analyzing muscle changes in facial nerve palsy
-- Studying aging-related changes in facial musculature
+- Analysing muscle changes in facial nerve palsy
+- Studying ageing-related changes in facial musculature
 - Assessment of post-surgical outcomes
 
 **Cosmetic Medicine:**
 - Objective measurements for botulinum toxin injection planning
 - Assessment of muscle atrophy and rejuvenation
-- Personalized treatment planning
+- Personalised treatment planning
 - Outcome documentation
 
 **Orthodontics & Orthognathics:**
-- Understanding masticatory muscle organization
+- Understanding masticatory muscle organisation
 - Planning surgical interventions
 - Functional analysis of jaw muscles
 - Post-surgical follow-up
@@ -692,8 +694,8 @@ a := "Thickness/" / x "-" y " thickness.nii.gz"
 
 **Biomechanics:**
 - Understanding forces generated by facial muscles
-- Analyzing muscle fiber organization
-- Modeling facial movement
+- Analysing muscle fibre organisation
+- Modelling facial movement
 - Functional analysis of muscle groups
 
 **Image Processing & AI:**
@@ -706,13 +708,13 @@ a := "Thickness/" / x "-" y " thickness.nii.gz"
 - Creating detailed 3D anatomical models
 - Medical student training
 - Surgical planning and education
-- Anatomical visualization
+- Anatomical visualisation
 
 ### Athlete & Performance Analysis
 
 **Facial Expression:**
 - Understanding smile mechanics
-- Analyzing expression production
+- Analysing expression production
 - Studying speech-related muscles
 - Performance analysis for actors/athletes
 
@@ -796,14 +798,14 @@ Region  Thickness_Mean  Thickness_SD  Distance_Mean  Fat_Volume  Bone_Volume
    - Pharyngeal constrictor muscles
    - Soft palate muscles
 
-### Muscle Organization
+### Muscle Organisation
 
 **Layering:**
 - **Deep layer:** Attached to bone, primary movers
-- **Intermediate layer:** Crossing muscle fibers, coordinative function
+- **Intermediate layer:** Crossing muscle fibres, coordinative function
 - **Superficial layer:** Expression muscles, attached to skin/fascia
 
-**Fiber Organization:**
+**Fibre Organisation:**
 - **Parallel fibers:** Greater contractile force
 - **Fusiform:** Balanced strength and motion range
 - **Complex arrangements:** Coordinated multi-directional movement
@@ -811,7 +813,7 @@ Region  Thickness_Mean  Thickness_SD  Distance_Mean  Fat_Volume  Bone_Volume
 ### MRI Imaging Principles
 
 **T1-Weighted Images:**
-- **Muscle:** Intermediate signal (medium gray)
+- **Muscle:** Intermediate signal (medium grey)
 - **Fat:** High signal (bright white)
 - **Bone:** Low signal (dark)
 - **Best for:** Anatomical detail, tissue identification
@@ -827,7 +829,7 @@ Region  Thickness_Mean  Thickness_SD  Distance_Mean  Fat_Volume  Bone_Volume
 
 - **Cloud2** - 3D visualization and geometric analysis
   - https://github.com/heikostark/Cloud2
-  - Used for visualizing 3D facial anatomy
+  - Used for visualising 3D facial anatomy
 
 - **imagexd** - Core image processing framework
   - https://stark-jena.de/research-interests/software/imagexd/
@@ -884,10 +886,10 @@ For more information on 3D facial anatomy research:
 - Large sheet muscle of lower face and neck
 - Extends from mandible to clavicle/shoulder
 - Important for facial expression and neck movement
-- Often analyzed separately due to unique anatomy
+- Often analysed separately due to unique anatomy
 
 **Class 3 - Masticatory Muscles**
-- Muscles specialized for jaw movement and biting
+- Muscles specialised for jaw movement and biting
 - Include: masseter, temporalis, medial/lateral pterygoid
 - Innervated by CN V (trigeminal nerve)
 - Critical for feeding and speech
@@ -930,7 +932,7 @@ For more information on 3D facial anatomy research:
 - Thickness measurement with large scan radii
 - Multi-subject batch processing
 
-**Optimization Tips:**
+**Optimisation Tips:**
 1. Process one subject at a time
 2. Adjust thread count based on available RAM
 3. Use disk caching for intermediate results
@@ -945,7 +947,7 @@ thread.max := 40
 // Example: 40 cores → thread.max := 32
 ```
 
-**Batch Parallelization:**
+**Batch Parallelisation:**
 - Run multiple subjects simultaneously on separate cores
 - Use GNU Parallel or similar tools
 - Monitor total system memory
@@ -1012,7 +1014,7 @@ thread.max := 40
 
 **Problem:** Slow processing
 - **Solution:** Increase thread count (if resources available)
-- Verify disk I/O not bottlenecked
+- Verify disk I/O is not bottlenecked
 - Check for competing processes
 - Consider SSD for data storage
 
@@ -1030,7 +1032,7 @@ Contributions are welcome! Areas for enhancement:
 
 - Additional anatomical classification schemes
 - Improved inter-rater agreement algorithms
-- Performance optimizations
+- Performance optimisations
 - Extended statistical analysis methods
 - Validation against manual measurements
 - Documentation improvements
@@ -1042,7 +1044,7 @@ Contributions are welcome! Areas for enhancement:
 2. Create a feature branch (`git checkout -b feature/improvement`)
 3. Make improvements with clear documentation
 4. Test thoroughly with sample data
-5. Submit pull request with detailed description
+5. Submit a pull request with a detailed description
 
 ## Citation
 
